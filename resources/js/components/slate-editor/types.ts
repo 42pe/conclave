@@ -91,3 +91,17 @@ export const LIST_TYPES: BlockType[] = ['bulleted-list', 'numbered-list'];
 export const EMPTY_DOCUMENT: ParagraphElement[] = [
     { type: 'paragraph', children: [{ text: '' }] },
 ];
+
+/**
+ * Normalize a Slate document loaded from the server.
+ * Laravel's ConvertEmptyStringsToNull middleware converts "" to null,
+ * but Slate requires text nodes to have string values.
+ */
+export function normalizeSlateValue(nodes: CustomDescendant[]): CustomDescendant[] {
+    return nodes.map((node) => {
+        if ('text' in node) {
+            return { ...node, text: node.text ?? '' };
+        }
+        return { ...node, children: normalizeSlateValue(node.children as CustomDescendant[]) } as CustomElement;
+    });
+}

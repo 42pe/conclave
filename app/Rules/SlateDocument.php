@@ -130,7 +130,8 @@ class SlateDocument implements ValidationRule
 
     private function isValidTextNode(mixed $node): bool
     {
-        if (! is_string($node['text'])) {
+        // ConvertEmptyStringsToNull middleware turns '' to null
+        if (! is_string($node['text']) && ! is_null($node['text'])) {
             return false;
         }
 
@@ -161,7 +162,8 @@ class SlateDocument implements ValidationRule
             return false;
         }
 
-        if ($child['text'] !== '') {
+        // ConvertEmptyStringsToNull middleware turns '' to null
+        if ($child['text'] !== '' && $child['text'] !== null) {
             return false;
         }
 

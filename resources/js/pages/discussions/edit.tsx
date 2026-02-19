@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import type { Descendant } from 'slate';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { SlateEditor } from '@/components/slate-editor';
+import { SlateEditor, normalizeSlateValue } from '@/components/slate-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -59,7 +59,7 @@ export default function DiscussionEdit({
                 ? String(discussion.location_id)
                 : '',
             title: discussion.title,
-            body: discussion.body as unknown as SlateNode[],
+            body: normalizeSlateValue(discussion.body as unknown as Descendant[]) as unknown as SlateNode[],
         });
 
     function handleSubmit(e: FormEvent) {

@@ -58,10 +58,10 @@ class Topic extends Model
 
         while (static::query()
             ->where('slug', $slug)
-            ->when($ignoreId, fn (Builder $q) => $q->where('id', '!=', $ignoreId))
+            ->when($ignoreId, fn(Builder $q) => $q->where('id', '!=', $ignoreId))
             ->exists()
         ) {
-            $slug = $originalSlug.'-'.$counter;
+            $slug = $originalSlug . '-' . $counter;
             $counter++;
         }
 

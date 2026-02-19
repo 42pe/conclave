@@ -123,6 +123,7 @@ class DiscussionController extends Controller
         return Inertia::render('discussions/edit', [
             'topic' => $topic,
             'discussion' => $discussion,
+            'locations' => Location::query()->active()->orderBy('sort_order')->get(['id', 'name']),
         ]);
     }
 

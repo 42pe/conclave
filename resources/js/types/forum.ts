@@ -75,6 +75,17 @@ export type LocationItem = {
     name: string;
 };
 
+export type LocationType = 'any' | 'us_state' | 'country';
+
+export type AdminLocation = {
+    id: number;
+    name: string;
+    iso_code: string;
+    type: LocationType;
+    is_active: boolean;
+    sort_order: number;
+};
+
 export type ConversationParticipant = {
     id: number;
     name: string;

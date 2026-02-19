@@ -184,6 +184,28 @@ test('invalid: exceeds max block count', function () {
     expect(validatesSlateDocument($blocks))->toBeFalse();
 });
 
+// --- Null text handling (ConvertEmptyStringsToNull middleware) ---
+
+test('valid void element with null text child (middleware converts empty to null)', function () {
+    expect(validatesSlateDocument([
+        ['type' => 'image', 'url' => 'https://example.com/img.jpg', 'children' => [['text' => null]]],
+    ]))->toBeTrue();
+});
+
+test('valid paragraph with null text (middleware converts empty to null)', function () {
+    expect(validatesSlateDocument([
+        ['type' => 'paragraph', 'children' => [['text' => null]]],
+    ]))->toBeTrue();
+});
+
+test('valid document with image and trailing empty paragraph (null text)', function () {
+    expect(validatesSlateDocument([
+        ['type' => 'paragraph', 'children' => [['text' => 'Some text']]],
+        ['type' => 'image', 'url' => 'https://example.com/img.jpg', 'children' => [['text' => null]]],
+        ['type' => 'paragraph', 'children' => [['text' => null]]],
+    ]))->toBeTrue();
+});
+
 test('invalid: link missing url', function () {
     expect(validatesSlateDocument([
         ['type' => 'paragraph', 'children' => [

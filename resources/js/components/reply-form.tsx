@@ -2,7 +2,7 @@ import { useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import type { Descendant } from 'slate';
-import { SlateEditor, EMPTY_DOCUMENT } from '@/components/slate-editor';
+import { SlateEditor, EMPTY_DOCUMENT, normalizeSlateValue } from '@/components/slate-editor';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 
@@ -11,6 +11,8 @@ type SlateNode = Record<string, string | boolean | number | null | SlateNode[]>;
 interface ReplyFormProps {
     discussionId: number;
     parentId?: number | null;
+    replyId?: number;
+    initialBody?: SlateNode[];
     onCancel?: () => void;
     autoFocus?: boolean;
 }
@@ -18,27 +20,39 @@ interface ReplyFormProps {
 export default function ReplyForm({
     discussionId,
     parentId = null,
+    replyId,
+    initialBody,
     onCancel,
     autoFocus = false,
 }: ReplyFormProps) {
+    const isEditing = !!replyId;
     const [editorKey, setEditorKey] = useState(0);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, patch, processing, errors, reset } = useForm({
         discussion_id: discussionId,
         parent_id: parentId,
-        body: EMPTY_DOCUMENT as unknown as SlateNode[],
+        body: isEditing
+            ? (normalizeSlateValue(initialBody as unknown as Descendant[]) as unknown as SlateNode[])
+            : (EMPTY_DOCUMENT as unknown as SlateNode[]),
     });
 
     function handleSubmit(e: FormEvent) {
         e.preventDefault();
-        post('/replies', {
-            preserveScroll: true,
-            onSuccess: () => {
-                reset('body');
-                setEditorKey((k) => k + 1);
-                onCancel?.();
-            },
-        });
+        if (isEditing) {
+            patch(`/replies/${replyId}`, {
+                preserveScroll: true,
+                onSuccess: () => onCancel?.(),
+            });
+        } else {
+            post('/replies', {
+                preserveScroll: true,
+                onSuccess: () => {
+                    reset('body');
+                    setEditorKey((k) => k + 1);
+                    onCancel?.();
+                },
+            });
+        }
     }
 
     return (
@@ -55,7 +69,7 @@ export default function ReplyForm({
 
             <div className="flex items-center gap-2">
                 <Button size="sm" disabled={processing}>
-                    {parentId ? 'Reply' : 'Post Reply'}
+                    {isEditing ? 'Save' : parentId ? 'Reply' : 'Post Reply'}
                 </Button>
                 {onCancel && (
                     <Button

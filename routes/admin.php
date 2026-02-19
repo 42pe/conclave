@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\UserModerationController;
 use App\Http\Middleware\EnsureUserIsAdmin;
@@ -14,6 +15,13 @@ Route::middleware(['auth', 'verified', EnsureUserIsAdmin::class])->prefix('admin
     Route::get('topics/{topic}/edit', [TopicController::class, 'edit'])->name('admin.topics.edit');
     Route::patch('topics/{topic}', [TopicController::class, 'update'])->name('admin.topics.update');
     Route::delete('topics/{topic}', [TopicController::class, 'destroy'])->name('admin.topics.destroy');
+
+    Route::get('locations', [LocationController::class, 'index'])->name('admin.locations.index');
+    Route::get('locations/create', [LocationController::class, 'create'])->name('admin.locations.create');
+    Route::post('locations', [LocationController::class, 'store'])->name('admin.locations.store');
+    Route::get('locations/{location}/edit', [LocationController::class, 'edit'])->name('admin.locations.edit');
+    Route::patch('locations/{location}', [LocationController::class, 'update'])->name('admin.locations.update');
+    Route::delete('locations/{location}', [LocationController::class, 'destroy'])->name('admin.locations.destroy');
 
     Route::get('users', [UserModerationController::class, 'index'])->name('admin.users.index');
     Route::get('users/create', [UserModerationController::class, 'create'])->name('admin.users.create');

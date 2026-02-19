@@ -90,6 +90,8 @@ export default function ReplyCard({
                 {showEditForm ? (
                     <ReplyForm
                         discussionId={discussionId}
+                        replyId={reply.id}
+                        initialBody={reply.body as never[]}
                         onCancel={() => setShowEditForm(false)}
                     />
                 ) : (

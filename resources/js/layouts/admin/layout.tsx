@@ -6,12 +6,18 @@ import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
 import type { NavItem } from '@/types';
+import { index as locationsIndex } from '@/routes/admin/locations';
 import { index as topicsIndex } from '@/routes/admin/topics';
 
 const sidebarNavItems: NavItem[] = [
     {
         title: 'Topics',
         href: topicsIndex(),
+        icon: null,
+    },
+    {
+        title: 'Locations',
+        href: locationsIndex(),
         icon: null,
     },
     {

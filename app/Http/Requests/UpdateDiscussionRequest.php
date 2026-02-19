@@ -25,6 +25,7 @@ class UpdateDiscussionRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'array', new SlateDocument],
+            'location_id' => ['nullable', 'exists:locations,id'],
         ];
     }
 }

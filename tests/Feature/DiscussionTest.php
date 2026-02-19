@@ -133,6 +133,26 @@ test('authenticated user can store a discussion', function () {
     $response->assertRedirect(route('discussions.show', [$topic, $discussion]));
 });
 
+test('authenticated user can store a discussion with an image', function () {
+    $user = User::factory()->create();
+    $topic = Topic::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->post(route('discussions.store'), [
+            'topic_id' => $topic->id,
+            'title' => 'Discussion With Image',
+            'body' => [
+                ['type' => 'paragraph', 'children' => [['text' => 'Check this out']]],
+                ['type' => 'image', 'url' => 'https://example.com/photo.jpg', 'children' => [['text' => '']]],
+                ['type' => 'paragraph', 'children' => [['text' => '']]],
+            ],
+        ]);
+
+    $discussion = Discussion::query()->where('title', 'Discussion With Image')->first();
+    expect($discussion)->not->toBeNull();
+    $response->assertRedirect(route('discussions.show', [$topic, $discussion]));
+});
+
 test('discussion can be stored with a location', function () {
     $user = User::factory()->create();
     $topic = Topic::factory()->create();
@@ -203,6 +223,7 @@ test('owner can edit their discussion', function () {
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->component('discussions/edit')
+            ->has('locations')
         );
 });
 
@@ -243,6 +264,51 @@ test('owner can update their discussion', function () {
 
     $discussion->refresh();
     expect($discussion->title)->toBe('New Title');
+});
+
+test('owner can update discussion with null text values in body', function () {
+    $user = User::factory()->create();
+    $topic = Topic::factory()->create();
+    $discussion = Discussion::factory()->create([
+        'topic_id' => $topic->id,
+        'user_id' => $user->id,
+        'body' => [
+            ['type' => 'paragraph', 'children' => [['text' => 'Hello']]],
+            ['type' => 'paragraph', 'children' => [['text' => null]]],
+            ['type' => 'image', 'url' => 'https://example.com/photo.jpg', 'children' => [['text' => null]]],
+        ],
+    ]);
+
+    $this->actingAs($user)
+        ->patch(route('discussions.update', [$topic, $discussion]), [
+            'title' => $discussion->title,
+            'body' => $discussion->body,
+        ])
+        ->assertRedirect();
+
+    $discussion->refresh();
+    expect($discussion->body)->toHaveCount(3);
+});
+
+test('owner can update discussion location', function () {
+    $user = User::factory()->create();
+    $topic = Topic::factory()->create();
+    $location = Location::factory()->create();
+    $discussion = Discussion::factory()->create([
+        'topic_id' => $topic->id,
+        'user_id' => $user->id,
+        'location_id' => null,
+    ]);
+
+    $this->actingAs($user)
+        ->patch(route('discussions.update', [$topic, $discussion]), [
+            'title' => $discussion->title,
+            'body' => [['type' => 'paragraph', 'children' => [['text' => 'Content']]]],
+            'location_id' => $location->id,
+        ]);
+
+    $discussion->refresh();
+    expect($discussion->location_id)->toBe($location->id);
 });
 
 test('owner can delete their discussion', function () {
