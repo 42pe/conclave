@@ -76,14 +76,27 @@ Each phase is executed by a team of specialized agents working in parallel where
   - Creates PostHog dashboards and insights for forum metrics
   - Implements email notification system (Phase 10)
 
+### Product Owner (Browser Reviewer)
+- **Role:** Visual verification and user experience gatekeeper
+- **Responsibilities:**
+  - Opens the running app via chrome-devtools MCP (screenshots, navigation, clicks, form fills)
+  - Verifies each feature works visually — layout, spacing, responsiveness, correct data display
+  - Tests happy-path user flows end-to-end in the browser (not just automated tests)
+  - Checks error states and edge cases render correctly (validation errors, empty states, deleted users, locked discussions)
+  - Verifies UI regressions from previous phases haven't been introduced
+  - Checks loading states, skeleton placeholders, and animations render properly
+  - Must approve the phase before Senior Engineer gives final technical sign-off
+  - Reports visual bugs, UX issues, and broken interactions back to the Senior Developer
+
 ### Phase Execution Flow
 ```
 For each phase:
-  1. Senior Engineer    → Reviews phase requirements, confirms approach
-  2. Senior Developer   → Implements backend + frontend code
-  3. QA Engineer         → Writes and runs Pest + Playwright tests (can start in parallel once interfaces are defined)
-  4. Instrumentation Eng → Reviews for tracking opportunities, adds event specs
-  5. Senior Engineer     → Final review and phase sign-off
+  1. Senior Engineer      → Reviews phase requirements, confirms approach
+  2. Senior Developer     → Implements backend + frontend code
+  3. QA Engineer           → Writes and runs Pest + Playwright tests (can start in parallel once interfaces are defined)
+  4. Instrumentation Eng  → Reviews for tracking opportunities, adds event specs
+  5. Product Owner         → Browser review: verifies features visually, tests user flows
+  6. Senior Engineer       → Final technical review and phase sign-off
 ```
 
 ---
@@ -259,6 +272,7 @@ body JSON NOT NULL, timestamps
 - **QA Engineer** → Pest tests for profile/registration, Playwright E2E for registration + profile flow
 - **Instrumentation Engineer** → Spec event: `user_registered` (with username), review user identification setup
 - **Senior Engineer** → Review User model design, validate role enum approach, sign off
+- **Product Owner** → Verify registration flow with username field, verify profile settings page displays and saves all new fields correctly
 
 ### Backend
 - Migration: `add_forum_columns_to_users_table`
@@ -299,6 +313,7 @@ body JSON NOT NULL, timestamps
 - **QA Engineer** → Pest tests for upload validation/privacy, Playwright E2E for avatar + privacy flows
 - **Instrumentation Engineer** → Spec events: `avatar_uploaded`, `privacy_settings_changed`
 - **Senior Engineer** → Review file storage approach, validate privacy toggle design
+- **Product Owner** → Verify avatar upload/preview/removal flow, verify privacy toggles persist and affect public profile visibility
 
 ### Backend
 - `app/Http/Controllers/Settings/AvatarController.php` — store/destroy
@@ -333,6 +348,7 @@ body JSON NOT NULL, timestamps
 - **QA Engineer** → Pest tests for admin authorization + topic CRUD, Playwright E2E for admin topic management + public listing
 - **Instrumentation Engineer** → Spec events: `topic_created`, `topic_updated`, `topic_visibility_changed`
 - **Senior Engineer** → Review admin gate/policy approach, validate location ISO codes, review slug generation
+- **Product Owner** → Verify admin topic CRUD pages (create/edit/delete), verify topic listing on homepage, verify visibility enforcement (guest vs logged-in vs admin)
 
 ### Backend
 - Migrations: `create_locations_table`, `create_topics_table`
@@ -375,6 +391,7 @@ body JSON NOT NULL, timestamps
 - **QA Engineer** → Pest tests for Slate validation + media upload, Playwright E2E for editor interactions + file uploads
 - **Instrumentation Engineer** → Spec events: `media_uploaded` (type, size), review for content validation logging
 - **Senior Engineer** → Review Slate.js architecture, validate media storage strategy, review JSON validation rule
+- **Product Owner** → Verify Slate editor toolbar interactions (bold, italic, headings, lists, links), verify media upload inline display (image/video/document), verify read-only renderer matches editor output
 
 ### Frontend (npm packages: `slate`, `slate-react`, `slate-history`, `is-hotkey`)
 - `resources/js/components/slate-editor/editor.tsx` — main editor with toolbar
@@ -412,6 +429,7 @@ body JSON NOT NULL, timestamps
 - **QA Engineer** → Pest tests for CRUD + authorization + visibility, Playwright E2E for full discussion lifecycle + location filtering
 - **Instrumentation Engineer** → Spec events: `discussion_created`, `discussion_viewed`, `discussion_edited`, `discussion_deleted`
 - **Senior Engineer** → Review policy logic (topic visibility), validate slug uniqueness, review pagination approach
+- **Product Owner** → Verify full discussion lifecycle in browser (create with Slate editor → view → edit → delete), verify topic listing with pagination, verify location filter works, verify pinned discussions appear first
 
 ### Backend
 - Migration: `create_discussions_table`
@@ -452,6 +470,7 @@ body JSON NOT NULL, timestamps
 - **QA Engineer** → Pest tests for nesting depth + CRUD + observer, Playwright E2E for nested reply flow + locked discussions
 - **Instrumentation Engineer** → Spec events: `reply_created` (with depth level), `reply_edited`, `reply_deleted`
 - **Senior Engineer** → Review depth enforcement logic, validate observer for denormalized counts, review recursive rendering
+- **Product Owner** → Verify nested reply rendering (3 levels of indentation), verify inline reply form opens/closes correctly, verify reply count updates in real-time, verify locked discussion hides reply form
 
 ### Backend
 - Migration: `create_replies_table`
@@ -488,6 +507,7 @@ body JSON NOT NULL, timestamps
 - **QA Engineer** → Pest tests for privacy + visibility + deleted user display, Playwright E2E for profile views + directory search
 - **Instrumentation Engineer** → Spec events: `profile_viewed`, `directory_searched`
 - **Senior Engineer** → Review privacy enforcement, validate deleted user display across all contexts
+- **Product Owner** → Verify user profile page (avatar, bio, discussions tab, replies tab), verify directory search and pagination, verify deleted users show "Deleted User" and are excluded from directory, verify privacy settings are honored on profile
 
 ### Backend
 - `app/Http/Controllers/UserProfileController.php` — show profile by username
@@ -519,6 +539,7 @@ body JSON NOT NULL, timestamps
 - **QA Engineer** → Pest tests for ban/suspend/delete + banned registration, Playwright E2E for moderation flows + suspended user experience
 - **Instrumentation Engineer** → Spec events: `user_banned`, `user_suspended`, `user_unsuspended`, `user_deleted`, `user_created_by_admin`, add structured logging for all moderation actions
 - **Senior Engineer** → Review anonymization logic, validate banned email enforcement, review middleware placement
+- **Product Owner** → Verify admin user management table (status badges, action dropdowns), verify ban/suspend/delete confirmation dialogs, verify suspended user sees appropriate restrictions, verify banned email blocks registration, verify "Deleted User" display on existing content
 
 ### Backend
 - Migration: `create_banned_emails_table`
@@ -559,6 +580,7 @@ body JSON NOT NULL, timestamps
 - **QA Engineer** → Pest tests for conversation authorization + messaging, Playwright E2E for full messaging flow + unread badges
 - **Instrumentation Engineer** → Spec events: `message_sent`, `conversation_started`, `conversation_read`
 - **Senior Engineer** → Review conversation lookup logic, validate unread tracking, review policy security
+- **Product Owner** → Verify full messaging flow (start conversation → send messages → receive reply), verify unread badge in sidebar updates, verify conversation list ordering, verify Slate editor works in message composer, verify message thread scroll behavior
 
 ### Backend
 - Migrations: `create_conversations_table`, `create_conversation_participants_table`, `create_messages_table`
@@ -598,6 +620,7 @@ body JSON NOT NULL, timestamps
 - **Senior Developer** → Email notification classes, notification preferences page, settings controller
 - **QA Engineer** → Pest tests for tracking (mocked) + notifications, Playwright E2E for notification preferences
 - **Senior Engineer** → Review event schema, validate notification delivery, final sign-off on full forum
+- **Product Owner** → Verify notification preferences page toggles persist, verify PostHog events fire in browser network tab, perform full regression test across all phases (registration → profile → topics → discussions → replies → messaging → admin moderation)
 
 ### Backend — PostHog
 - `ddev composer require posthog/posthog-php`
@@ -643,7 +666,8 @@ After each phase, the following checks must pass before the **Senior Engineer** 
 | Frontend build | Senior Developer | `npm run build` |
 | TypeScript check | Senior Developer | `npm run types` |
 | Event tracking review | Instrumentation Engineer | Verify events fire correctly via PostHog debug mode (Phase 10+) |
-| Final review | Senior Engineer | Code review, architecture validation, phase sign-off |
+| Browser review | Product Owner | Visual verification via chrome-devtools MCP: screenshots, user flow testing, UI regression check |
+| Final review | Senior Engineer | Code review, architecture validation, phase sign-off (only after Product Owner approval) |
 
 ---
 
