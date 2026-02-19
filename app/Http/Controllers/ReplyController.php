@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreReplyRequest;
 use App\Http\Requests\UpdateReplyRequest;
 use App\Models\Reply;
+use App\Notifications\NewReplyNotification;
+use App\Services\PostHogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
 class ReplyController extends Controller
 {
+    public function __construct(private PostHogService $postHog) {}
+
     /**
      * Store a newly created reply.
      */
@@ -34,7 +38,19 @@ class ReplyController extends Controller
 
         $reply = Reply::create($data);
 
+        $this->postHog->capture($request->user(), 'reply_created', [
+            'reply_id' => $reply->id,
+            'discussion_id' => $reply->discussion_id,
+            'depth' => $reply->depth,
+        ]);
+
+        // Notify the discussion author (if it's not the replier)
         $discussion = $reply->discussion;
+        $discussionAuthor = $discussion->user;
+
+        if ($discussionAuthor && $discussionAuthor->id !== $request->user()->id && ! $discussionAuthor->is_deleted) {
+            $discussionAuthor->notify(new NewReplyNotification($reply, $discussion));
+        }
 
         return back();
     }

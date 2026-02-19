@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\AvatarController;
+use App\Http\Controllers\Settings\NotificationController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\PrivacyController;
 use App\Http\Controllers\Settings\ProfileController;
@@ -19,6 +20,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/privacy', [PrivacyController::class, 'edit'])->name('privacy.edit');
     Route::patch('settings/privacy', [PrivacyController::class, 'update'])->name('privacy.update');
+
+    Route::get('settings/notifications', [NotificationController::class, 'edit'])->name('notifications.edit');
+    Route::patch('settings/notifications', [NotificationController::class, 'update'])->name('notifications.update');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreConversationRequest;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\User;
+use App\Notifications\NewMessageNotification;
+use App\Services\PostHogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -13,6 +16,8 @@ use Inertia\Response;
 
 class ConversationController extends Controller
 {
+    public function __construct(private PostHogService $postHog) {}
+
     /**
      * List conversations for the authenticated user.
      */
@@ -96,6 +101,16 @@ class ConversationController extends Controller
             'user_id' => $user->id,
             'body' => $request->validated()['body'],
         ]);
+
+        $this->postHog->capture($user, 'conversation_started', [
+            'conversation_id' => $conversation->id,
+        ]);
+
+        // Notify the recipient
+        $recipient = User::find($recipientId);
+        if ($recipient && ! $recipient->is_deleted) {
+            $recipient->notify(new NewMessageNotification($conversation, $user));
+        }
 
         return to_route('conversations.show', $conversation);
     }

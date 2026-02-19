@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateDiscussionRequest;
 use App\Models\Discussion;
 use App\Models\Location;
 use App\Models\Topic;
+use App\Services\PostHogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -14,6 +15,8 @@ use Inertia\Response;
 
 class DiscussionController extends Controller
 {
+    public function __construct(private PostHogService $postHog) {}
+
     /**
      * Display discussions for a topic.
      */
@@ -62,6 +65,13 @@ class DiscussionController extends Controller
 
         $user = request()->user();
 
+        if ($user) {
+            $this->postHog->capture($user, 'discussion_viewed', [
+                'discussion_id' => $discussion->id,
+                'topic_id' => $topic->id,
+            ]);
+        }
+
         return Inertia::render('discussions/show', [
             'topic' => $topic,
             'discussion' => $discussion,
@@ -94,6 +104,11 @@ class DiscussionController extends Controller
         $data['user_id'] = $request->user()->id;
 
         $discussion = Discussion::create($data);
+
+        $this->postHog->capture($request->user(), 'discussion_created', [
+            'discussion_id' => $discussion->id,
+            'topic_id' => $discussion->topic_id,
+        ]);
 
         return to_route('discussions.show', [$discussion->topic, $discussion]);
     }

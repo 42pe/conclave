@@ -18,6 +18,8 @@ export type User = {
     show_real_name: boolean;
     show_email: boolean;
     show_in_directory: boolean;
+    notify_replies: boolean;
+    notify_messages: boolean;
     two_factor_enabled?: boolean;
     created_at: string;
     updated_at: string;

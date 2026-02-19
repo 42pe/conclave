@@ -37,6 +37,8 @@ class User extends Authenticatable
         'show_real_name',
         'show_email',
         'show_in_directory',
+        'notify_replies',
+        'notify_messages',
     ];
 
     /**
@@ -78,6 +80,8 @@ class User extends Authenticatable
             'show_real_name' => 'boolean',
             'show_email' => 'boolean',
             'show_in_directory' => 'boolean',
+            'notify_replies' => 'boolean',
+            'notify_messages' => 'boolean',
         ];
     }
 
