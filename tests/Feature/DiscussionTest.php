@@ -12,7 +12,12 @@ test('guest can view discussions in a public topic', function () {
     $topic = Topic::factory()->create(['visibility' => TopicVisibility::Public]);
 
     $this->get(route('topics.show', $topic))
-        ->assertSuccessful();
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('topics/show')
+            ->where('topic.id', $topic->id)
+            ->where('auth.user', null)
+        );
 });
 
 test('guest cannot view discussions in a private topic', function () {
@@ -160,6 +165,19 @@ test('discussion slug is unique within a topic', function () {
     $discussions = Discussion::query()->where('topic_id', $topic->id)->get();
     expect($discussions)->toHaveCount(2);
     expect($discussions->pluck('slug')->unique())->toHaveCount(2);
+});
+
+test('guest can view a discussion in a public topic', function () {
+    $topic = Topic::factory()->create(['visibility' => TopicVisibility::Public]);
+    $discussion = Discussion::factory()->create(['topic_id' => $topic->id]);
+
+    $this->get(route('discussions.show', [$topic, $discussion]))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('discussions/show')
+            ->where('discussion.id', $discussion->id)
+            ->where('auth.user', null)
+        );
 });
 
 test('user can view a discussion', function () {

@@ -56,7 +56,7 @@ export function AppSidebar() {
             href: '/directory',
             icon: Users,
         },
-        ...(auth.user.role === 'admin'
+        ...(auth.user?.role === 'admin'
             ? [{ title: 'Admin', href: adminTopics(), icon: Shield }]
             : []),
     ];
