@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Shield } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Shield, Users } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -38,6 +38,11 @@ export function AppSidebar() {
             title: 'Dashboard',
             href: dashboard(),
             icon: LayoutGrid,
+        },
+        {
+            title: 'Directory',
+            href: '/directory',
+            icon: Users,
         },
         ...(auth.user.role === 'admin'
             ? [{ title: 'Admin', href: adminTopics(), icon: Shield }]

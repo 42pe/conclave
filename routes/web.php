@@ -36,3 +36,4 @@ require __DIR__.'/settings.php';
 require __DIR__.'/admin.php';
 require __DIR__.'/media.php';
 require __DIR__.'/forum.php';
+require __DIR__.'/profile.php';
