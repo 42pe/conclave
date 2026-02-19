@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, MessageCircle, MessageSquare, Shield } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, MessageCircle, MessageSquare, Shield, Users } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -19,6 +19,7 @@ import type { Auth, NavItem } from '@/types';
 import AppLogo from './app-logo';
 import { dashboard } from '@/routes';
 import { index as adminTopicsIndex } from '@/routes/admin/topics';
+import { index as directoryIndex } from '@/routes/directory';
 
 const mainNavItems: NavItem[] = [
     {
@@ -30,6 +31,11 @@ const mainNavItems: NavItem[] = [
         title: 'Forum',
         href: '/',
         icon: MessageCircle,
+    },
+    {
+        title: 'Directory',
+        href: directoryIndex().url,
+        icon: Users,
     },
 ];
 

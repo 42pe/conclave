@@ -1,8 +1,16 @@
 <?php
 
+use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\DiscussionController;
 use App\Http\Controllers\ReplyController;
+use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/directory', [DirectoryController::class, 'index'])
+    ->name('directory.index');
+
+Route::get('/users/{user:username}', [UserProfileController::class, 'show'])
+    ->name('users.show');
 
 Route::get('/topics/{topic:slug}', [DiscussionController::class, 'index'])
     ->name('topics.show');
