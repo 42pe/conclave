@@ -33,7 +33,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 This project has domain-specific skills available. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
 
-- `wayfinder-development` — Activates whenever referencing backend routes in frontend components or using generated TypeScript types. Use when importing from @/actions or @/routes, calling Laravel routes from TypeScript, working with Wayfinder route functions, or using generated types for models, enums, shared data, or broadcast channels.
+- `wayfinder-development` — Activates whenever referencing backend routes in frontend components. Use when importing from @/actions or @/routes, calling Laravel routes from TypeScript, or working with Wayfinder route functions.
 - `pest-testing` — Tests applications using the Pest 4 PHP framework. Activates when writing tests, creating unit or feature tests, adding assertions, testing Livewire components, browser testing, debugging test failures, working with datasets or mocking; or when the user mentions test, spec, TDD, expects, assertion, coverage, or needs to verify functionality works.
 - `inertia-react-development` — Develops Inertia.js v2 React client-side applications. Activates when creating React pages, forms, or navigation; using &lt;Link&gt;, &lt;Form&gt;, useForm, or router; working with deferred props, prefetching, or polling; or when user mentions React with Inertia, React pages, React forms, or React navigation.
 - `tailwindcss-development` — Styles applications using Tailwind CSS v4 utilities. Activates when adding styles, restyling components, working with gradients, spacing, layout, flex, grid, responsive design, dark mode, colors, typography, or borders; or when the user mentions CSS, styling, classes, Tailwind, restyle, hero section, cards, buttons, or any visual/UI changes.
@@ -258,28 +258,25 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 # Laravel Wayfinder
 
-Wayfinder generates TypeScript functions and types for Laravel routes, models, enums, broadcast channels, and more. Import from `@/actions/` (controllers) or `@/routes/` (named routes).
+Wayfinder generates TypeScript functions for Laravel routes. Import from `@/actions/` (controllers) or `@/routes/` (named routes).
 
-- IMPORTANT: Activate `wayfinder-development` skill whenever referencing backend routes in frontend components or using generated TypeScript types.
+- IMPORTANT: Activate `wayfinder-development` skill whenever referencing backend routes in frontend components.
 - Invokable Controllers: `import StorePost from '@/actions/.../StorePostController'; StorePost()`.
 - Parameter Binding: Detects route keys (`{post:slug}`) — `show({ slug: "my-post" })`.
 - Query Merging: `show(1, { mergeQuery: { page: 2, sort: null } })` merges with current URL, `null` removes params.
 - Inertia: Use `.form()` with `<Form>` component or `form.submit(store())` with useForm.
-- This project uses the Vite plugin (`@laravel/vite-plugin-wayfinder`) — routes and types auto-generate when Vite is running.
-- Also generates TypeScript types for: Eloquent models, PHP enums, Inertia shared data, broadcast channels/events, and environment variables. See `config/wayfinder.php`.
 
 === wayfinder/v rules ===
 
-# Laravel Wayfinder (dev-next)
+# Laravel Wayfinder
 
-Wayfinder generates TypeScript functions and types for Laravel routes, models, enums, broadcast channels, and more. Import from `@/actions/` (controllers) or `@/routes/` (named routes).
+Wayfinder generates TypeScript functions for Laravel routes. Import from `@/actions/` (controllers) or `@/routes/` (named routes).
 
-- IMPORTANT: Activate `wayfinder-development` skill whenever referencing backend routes in frontend components or using generated TypeScript types.
+- IMPORTANT: Activate `wayfinder-development` skill whenever referencing backend routes in frontend components.
 - Invokable Controllers: `import StorePost from '@/actions/.../StorePostController'; StorePost()`.
 - Parameter Binding: Detects route keys (`{post:slug}`) — `show({ slug: "my-post" })`.
 - Query Merging: `show(1, { mergeQuery: { page: 2, sort: null } })` merges with current URL, `null` removes params.
 - Inertia: Use `.form()` with `<Form>` component or `form.submit(store())` with useForm.
-- Also generates TypeScript types for: Eloquent models, PHP enums, Inertia shared data, broadcast channels/events, and environment variables.
 
 === pest/core rules ===
 
