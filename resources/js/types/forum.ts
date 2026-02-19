@@ -74,3 +74,39 @@ export type LocationItem = {
     id: number;
     name: string;
 };
+
+export type ConversationParticipant = {
+    id: number;
+    name: string;
+    username: string;
+    avatar_path: string | null;
+    is_deleted: boolean;
+    display_name: string;
+    pivot?: { last_read_at: string | null };
+};
+
+export type MessageItem = {
+    id: number;
+    conversation_id: number;
+    user_id: number | null;
+    body: unknown[];
+    user?: {
+        id: number;
+        name: string;
+        username: string;
+        avatar_path: string | null;
+        is_deleted: boolean;
+        display_name: string;
+    };
+    created_at: string;
+    updated_at: string;
+};
+
+export type ConversationItem = {
+    id: number;
+    participants: ConversationParticipant[];
+    latest_message?: MessageItem | null;
+    has_unread?: boolean;
+    created_at: string;
+    updated_at: string;
+};

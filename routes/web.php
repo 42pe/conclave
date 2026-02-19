@@ -37,3 +37,4 @@ require __DIR__.'/admin.php';
 require __DIR__.'/media.php';
 require __DIR__.'/forum.php';
 require __DIR__.'/profile.php';
+require __DIR__.'/messages.php';
