@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -25,6 +26,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+            'username' => fake()->unique()->regexify('[a-z][a-z0-9_-]{4,15}'),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
@@ -32,6 +34,7 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+            'role' => UserRole::User,
         ];
     }
 
@@ -54,6 +57,55 @@ class UserFactory extends Factory
             'two_factor_secret' => encrypt('secret'),
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Admin,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a moderator.
+     */
+    public function moderator(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Moderator,
+        ]);
+    }
+
+    /**
+     * Indicate that the user has been soft-deleted (anonymized).
+     */
+    public function deleted(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_deleted' => true,
+            'name' => 'Deleted User',
+            'username' => 'deleted-'.Str::random(10),
+            'email' => 'deleted-'.Str::random(10).'@deleted.local',
+            'first_name' => null,
+            'last_name' => null,
+            'preferred_name' => null,
+            'bio' => null,
+            'avatar_path' => null,
+            'deleted_at' => now(),
+        ]);
+    }
+
+    /**
+     * Indicate that the user is suspended.
+     */
+    public function suspended(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_suspended' => true,
         ]);
     }
 }

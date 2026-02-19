@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -20,8 +21,21 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
+        'first_name',
+        'last_name',
+        'preferred_name',
+        'bio',
+        'avatar_path',
         'email',
         'password',
+        'role',
+        'is_deleted',
+        'is_suspended',
+        'deleted_at',
+        'show_real_name',
+        'show_email',
+        'show_in_directory',
     ];
 
     /**
@@ -37,6 +51,15 @@ class User extends Authenticatable
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'display_name',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -47,6 +70,43 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'role' => UserRole::class,
+            'is_deleted' => 'boolean',
+            'is_suspended' => 'boolean',
+            'deleted_at' => 'datetime',
+            'show_real_name' => 'boolean',
+            'show_email' => 'boolean',
+            'show_in_directory' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the user's display name.
+     *
+     * Returns "Deleted User" for deleted accounts, preferred name if set,
+     * or falls back to the full name.
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        if ($this->is_deleted) {
+            return 'Deleted User';
+        }
+
+        return $this->preferred_name ?? $this->name;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === UserRole::Admin;
+    }
+
+    public function isModerator(): bool
+    {
+        return $this->role === UserRole::Moderator;
+    }
+
+    public function isAdminOrModerator(): bool
+    {
+        return $this->isAdmin() || $this->isModerator();
     }
 }
