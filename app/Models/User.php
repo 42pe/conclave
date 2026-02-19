@@ -135,4 +135,12 @@ class User extends Authenticatable
     {
         return $this->morphMany(Media::class, 'mediable');
     }
+
+    /**
+     * Get the banned email records associated with this user.
+     */
+    public function bannedEmails(): HasMany
+    {
+        return $this->hasMany(BannedEmail::class);
+    }
 }

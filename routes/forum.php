@@ -17,9 +17,11 @@ Route::get('/topics/{topic:slug}', [DiscussionController::class, 'index'])
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/topics/{topic:slug}/discussions/create', [DiscussionController::class, 'create'])
+        ->middleware('not-suspended')
         ->name('topics.discussions.create');
 
     Route::post('/topics/{topic:slug}/discussions', [DiscussionController::class, 'store'])
+        ->middleware('not-suspended')
         ->name('topics.discussions.store');
 
     Route::get('/topics/{topic:slug}/discussions/{discussion:slug}/edit', [DiscussionController::class, 'edit'])
@@ -35,6 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('topics.discussions.destroy');
 
     Route::post('/discussions/{discussion}/replies', [ReplyController::class, 'store'])
+        ->middleware('not-suspended')
         ->name('discussions.replies.store');
 
     Route::patch('/replies/{reply}', [ReplyController::class, 'update'])

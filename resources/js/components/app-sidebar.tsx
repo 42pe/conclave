@@ -19,6 +19,7 @@ import type { Auth, NavItem } from '@/types';
 import AppLogo from './app-logo';
 import { dashboard } from '@/routes';
 import { index as adminTopicsIndex } from '@/routes/admin/topics';
+import { index as adminUsersIndex } from '@/routes/admin/users';
 import { index as directoryIndex } from '@/routes/directory';
 
 const mainNavItems: NavItem[] = [
@@ -44,6 +45,11 @@ const adminNavItems: NavItem[] = [
         title: 'Topics',
         href: adminTopicsIndex(),
         icon: MessageSquare,
+    },
+    {
+        title: 'Users',
+        href: adminUsersIndex(),
+        icon: Users,
     },
 ];
 
