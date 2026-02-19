@@ -40,7 +40,7 @@ export default function Profile({
                     <Heading
                         variant="small"
                         title="Profile information"
-                        description="Update your name and email address"
+                        description="Update your profile details and personal information"
                     />
 
                     <Form
@@ -52,6 +52,24 @@ export default function Profile({
                     >
                         {({ processing, recentlySuccessful, errors }) => (
                             <>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="username">Username</Label>
+
+                                    <Input
+                                        id="username"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.username}
+                                        name="username"
+                                        required
+                                        placeholder="Username"
+                                    />
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.username}
+                                    />
+                                </div>
+
                                 <div className="grid gap-2">
                                     <Label htmlFor="name">Name</Label>
 
@@ -117,6 +135,87 @@ export default function Profile({
                                             )}
                                         </div>
                                     )}
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="first_name">
+                                        First name
+                                    </Label>
+
+                                    <Input
+                                        id="first_name"
+                                        className="mt-1 block w-full"
+                                        defaultValue={
+                                            auth.user.first_name ?? ''
+                                        }
+                                        name="first_name"
+                                        autoComplete="given-name"
+                                        placeholder="First name"
+                                    />
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.first_name}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="last_name">Last name</Label>
+
+                                    <Input
+                                        id="last_name"
+                                        className="mt-1 block w-full"
+                                        defaultValue={
+                                            auth.user.last_name ?? ''
+                                        }
+                                        name="last_name"
+                                        autoComplete="family-name"
+                                        placeholder="Last name"
+                                    />
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.last_name}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="preferred_name">
+                                        Preferred name
+                                    </Label>
+
+                                    <Input
+                                        id="preferred_name"
+                                        className="mt-1 block w-full"
+                                        defaultValue={
+                                            auth.user.preferred_name ?? ''
+                                        }
+                                        name="preferred_name"
+                                        placeholder="Preferred name"
+                                    />
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.preferred_name}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="bio">Bio</Label>
+
+                                    <textarea
+                                        id="bio"
+                                        className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring mt-1 block w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                        defaultValue={auth.user.bio ?? ''}
+                                        name="bio"
+                                        rows={3}
+                                        placeholder="Tell us about yourself"
+                                    />
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.bio}
+                                    />
+                                </div>
 
                                 <div className="flex items-center gap-4">
                                     <Button

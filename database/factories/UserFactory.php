@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -32,6 +33,14 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+            'username' => fake()->regexify('[a-z][a-z0-9]{3,7}') . fake()->unique()->numerify('###'),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'preferred_name' => null,
+            'bio' => null,
+            'role' => UserRole::User,
+            'is_deleted' => false,
+            'is_suspended' => false,
         ];
     }
 
@@ -54,6 +63,47 @@ class UserFactory extends Factory
             'two_factor_secret' => encrypt('secret'),
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Admin,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a moderator.
+     */
+    public function moderator(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Moderator,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is deleted.
+     */
+    public function deleted(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_deleted' => true,
+            'deleted_at' => now(),
+        ]);
+    }
+
+    /**
+     * Indicate that the user is suspended.
+     */
+    public function suspended(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_suspended' => true,
         ]);
     }
 }

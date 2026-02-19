@@ -112,6 +112,37 @@ For each phase:
 
 ---
 
+## Development Data Seeders
+
+Each phase includes a dedicated **Development Seeder** that populates the database with realistic data for manual review, browser testing, and Product Owner sign-off. All dev seeders live in `database/seeders/Development/` and are called from `DevelopmentSeeder`, which is invoked via `DatabaseSeeder` in non-production environments.
+
+**Run:** `ddev php artisan db:seed` (or `ddev php artisan migrate:fresh --seed` for a clean reset)
+
+**Login credentials for all seeded users:** password = `password`
+
+### Per-Phase Seeder Responsibilities
+
+| Phase | Seeder | Seeds |
+|-------|--------|-------|
+| 1 | `UserSeeder` | Admin, moderator, regular users (with bios, preferred names), suspended user, deleted user, unverified user |
+| 2 | `UserSeeder` (update) | Users with avatars, varied privacy settings |
+| 3 | `LocationSeeder` + `TopicSeeder` | US states/countries + sample topics (public, private, restricted) with icons/descriptions |
+| 4 | — | Media records seeded alongside discussions in Phase 5 |
+| 5 | `DiscussionSeeder` | Discussions across topics with Slate.js content, pinned discussions, varied locations |
+| 6 | `ReplySeeder` | Nested replies (depth 0, 1, 2) across discussions, replies from different users |
+| 7 | — | User profiles already populated from Phase 1-2 seeders |
+| 8 | — | Suspended/deleted/banned users already seeded from Phase 1; `BannedEmailSeeder` for banned email list |
+| 9 | `ConversationSeeder` | Conversations between users with multiple messages, unread state |
+| 10 | — | Notification preferences set on seeded users |
+
+### Seeder Design Principles
+- All seeded users use `password` as their password for easy login
+- Named users with predictable usernames/emails for quick access (e.g., `admin@example.com`, `moderator@example.com`)
+- Realistic content — bios, discussion titles, and reply text should feel plausible, not lorem ipsum
+- Cover edge cases visually: long usernames, long bios, empty optional fields, deleted users mixed with active content
+
+---
+
 ## Testing Strategy
 
 - **Pest** — Unit & feature tests (backend logic, policies, validation, API behavior)
@@ -280,7 +311,9 @@ body JSON NOT NULL, timestamps
 - Update `app/Models/User.php` — new fillable, casts (role → UserRole, is_deleted/is_suspended → boolean), `displayName` accessor, `isAdmin()`, `isModerator()`, `isAdminOrModerator()` helpers
 - Update `app/Concerns/ProfileValidationRules.php` — add username rules
 - Update `database/factories/UserFactory.php` — new fields, `admin()`, `moderator()`, `deleted()`, `suspended()` states
-- Update `database/seeders/DatabaseSeeder.php` — seed admin user with username
+- Update `database/seeders/DatabaseSeeder.php` — call `DevelopmentSeeder` in non-production
+- Create `database/seeders/DevelopmentSeeder.php` — orchestrates all dev seeders
+- Create `database/seeders/UserSeeder.php` — admin, moderator, regular users (with varied profiles), suspended user, deleted user, unverified user
 - Update `app/Actions/Fortify/CreateNewUser.php` — accept username
 - Update `app/Http/Requests/Settings/ProfileUpdateRequest.php` — new fields
 - Update `app/Http/Controllers/Settings/ProfileController.php` — handle new fields
