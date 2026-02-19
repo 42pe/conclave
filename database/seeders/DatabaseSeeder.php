@@ -13,6 +13,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(LocationSeeder::class);
+
         User::factory()->admin()->create([
             'name' => 'Admin User',
             'username' => 'admin',
