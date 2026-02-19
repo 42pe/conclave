@@ -14,6 +14,11 @@ const sidebarNavItems: NavItem[] = [
         href: topicsIndex(),
         icon: null,
     },
+    {
+        title: 'Users',
+        href: '/admin/users',
+        icon: null,
+    },
 ];
 
 export default function AdminLayout({ children }: PropsWithChildren) {
