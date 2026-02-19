@@ -50,6 +50,26 @@ export type Discussion = {
     updated_at: string;
 };
 
+export type Reply = {
+    id: number;
+    discussion_id: number;
+    user_id: number | null;
+    parent_id: number | null;
+    depth: number;
+    body: unknown[];
+    user?: {
+        id: number;
+        name: string;
+        username: string;
+        avatar_path: string | null;
+        is_deleted: boolean;
+        display_name: string;
+    };
+    children?: Reply[];
+    created_at: string;
+    updated_at: string;
+};
+
 export type LocationItem = {
     id: number;
     name: string;

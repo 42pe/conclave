@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Lock, MapPin, Pencil, Pin, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { SlateRenderer } from '@/components/slate-editor';
+import ReplyThread from '@/components/reply-thread';
 import UserDisplay from '@/components/user-display';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,14 +18,16 @@ import {
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Discussion, Topic } from '@/types';
+import type { BreadcrumbItem, Discussion, Reply, Topic } from '@/types';
 import type { Descendant } from 'slate';
 
 interface DiscussionShowProps {
     topic: Topic;
     discussion: Discussion;
+    replies: Reply[];
     canEdit: boolean;
     canDelete: boolean;
+    canReply: boolean;
 }
 
 function formatTimeAgo(dateString: string): string {
@@ -62,8 +65,10 @@ function formatTimeAgo(dateString: string): string {
 export default function DiscussionShow({
     topic,
     discussion,
+    replies,
     canEdit,
     canDelete,
+    canReply,
 }: DiscussionShowProps) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -207,6 +212,15 @@ export default function DiscussionShow({
                         value={discussion.body as Descendant[]}
                     />
                 </div>
+
+                <Separator />
+
+                <ReplyThread
+                    replies={replies}
+                    discussionId={discussion.id}
+                    discussionLocked={discussion.is_locked}
+                    canReply={canReply}
+                />
             </div>
         </AppLayout>
     );

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DiscussionController;
+use App\Http\Controllers\ReplyController;
 use Illuminate\Support\Facades\Route;
 
 // Topic discussions listing (public or auth depending on visibility)
@@ -29,3 +30,10 @@ Route::patch('topics/{topic:slug}/discussions/{discussion:slug}', [DiscussionCon
 Route::delete('topics/{topic:slug}/discussions/{discussion:slug}', [DiscussionController::class, 'destroy'])
     ->middleware(['auth', 'verified'])
     ->name('discussions.destroy');
+
+// Reply routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('replies', [ReplyController::class, 'store'])->name('replies.store');
+    Route::patch('replies/{reply}', [ReplyController::class, 'update'])->name('replies.update');
+    Route::delete('replies/{reply}', [ReplyController::class, 'destroy'])->name('replies.destroy');
+});

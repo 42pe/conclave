@@ -46,11 +46,29 @@ class DiscussionController extends Controller
             'location:id,name',
         ]);
 
+        $replies = $discussion->replies()
+            ->with(['user:id,name,username,avatar_path,is_deleted,preferred_name'])
+            ->whereNull('parent_id')
+            ->with(['children' => function ($q) {
+                $q->with(['user:id,name,username,avatar_path,is_deleted,preferred_name'])
+                    ->with(['children' => function ($q2) {
+                        $q2->with(['user:id,name,username,avatar_path,is_deleted,preferred_name'])
+                            ->oldest();
+                    }])
+                    ->oldest();
+            }])
+            ->oldest()
+            ->get();
+
+        $user = request()->user();
+
         return Inertia::render('discussions/show', [
             'topic' => $topic,
             'discussion' => $discussion,
-            'canEdit' => request()->user()?->can('update', $discussion) ?? false,
-            'canDelete' => request()->user()?->can('delete', $discussion) ?? false,
+            'replies' => $replies,
+            'canEdit' => $user?->can('update', $discussion) ?? false,
+            'canDelete' => $user?->can('delete', $discussion) ?? false,
+            'canReply' => $user?->can('create', [\App\Models\Reply::class, $discussion]) ?? false,
         ]);
     }
 
