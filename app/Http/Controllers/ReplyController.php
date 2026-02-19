@@ -6,12 +6,19 @@ use App\Http\Requests\StoreReplyRequest;
 use App\Http\Requests\UpdateReplyRequest;
 use App\Models\Discussion;
 use App\Models\Reply;
+use App\Models\User;
+use App\Notifications\NewReplyNotification;
+use App\Services\PostHogService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 
 class ReplyController extends Controller
 {
     use AuthorizesRequests;
+
+    public function __construct(
+        private PostHogService $postHog,
+    ) {}
 
     /**
      * Store a newly created reply.
@@ -26,13 +33,20 @@ class ReplyController extends Controller
             $depth = $parent->depth + 1;
         }
 
-        Reply::create([
+        $reply = Reply::create([
             'discussion_id' => $discussion->id,
             'user_id' => $request->user()->id,
             'parent_id' => $request->parent_id,
             'depth' => $depth,
             'body' => $request->body,
         ]);
+
+        $this->postHog->capture((string) $request->user()->id, 'reply_created', [
+            'reply_id' => $reply->id,
+            'discussion_id' => $discussion->id,
+        ]);
+
+        $this->sendReplyNotifications($reply, $discussion, $request->user());
 
         return back();
     }
@@ -61,5 +75,28 @@ class ReplyController extends Controller
         $reply->delete();
 
         return back();
+    }
+
+    /**
+     * Send notifications to discussion author and parent reply author.
+     */
+    private function sendReplyNotifications(Reply $reply, Discussion $discussion, User $actor): void
+    {
+        $notified = [];
+
+        // Notify discussion author (if not the actor)
+        $discussionAuthor = $discussion->user;
+        if ($discussionAuthor && $discussionAuthor->id !== $actor->id) {
+            $discussionAuthor->notify(new NewReplyNotification($reply, $discussion));
+            $notified[] = $discussionAuthor->id;
+        }
+
+        // Notify parent reply author (if nested and not already notified, and not the actor)
+        if ($reply->parent_id) {
+            $parentAuthor = $reply->parent?->user;
+            if ($parentAuthor && $parentAuthor->id !== $actor->id && ! in_array($parentAuthor->id, $notified)) {
+                $parentAuthor->notify(new NewReplyNotification($reply, $discussion));
+            }
+        }
     }
 }

@@ -10,12 +10,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BanUserRequest;
 use App\Http\Requests\Admin\CreateUserRequest;
 use App\Models\User;
+use App\Services\PostHogService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class UserModerationController extends Controller
 {
+    public function __construct(
+        private PostHogService $postHog,
+    ) {}
     /**
      * Display a paginated listing of users.
      */
@@ -60,6 +64,10 @@ class UserModerationController extends Controller
 
         $action->handle($user);
 
+        $this->postHog->capture((string) request()->user()->id, 'user_suspended', [
+            'target_user_id' => $user->id,
+        ]);
+
         return back();
     }
 
@@ -84,6 +92,10 @@ class UserModerationController extends Controller
 
         $action->handle($user, $request->user(), $request->validated('reason'));
 
+        $this->postHog->capture((string) $request->user()->id, 'user_banned', [
+            'target_user_id' => $user->id,
+        ]);
+
         return to_route('admin.users.index');
     }
 
@@ -97,6 +109,10 @@ class UserModerationController extends Controller
         }
 
         $action->handle($user);
+
+        $this->postHog->capture((string) request()->user()->id, 'user_deleted', [
+            'target_user_id' => $user->id,
+        ]);
 
         return to_route('admin.users.index');
     }

@@ -98,7 +98,7 @@ class UserSeeder extends Seeder
             'bio' => null,
         ]);
 
-        // Privacy-conscious user — hides real name and email
+        // Privacy-conscious user — hides real name and email, notifications off
         User::factory()->create([
             'name' => 'Private Person',
             'username' => 'private-user',
@@ -110,6 +110,8 @@ class UserSeeder extends Seeder
             'show_real_name' => false,
             'show_email' => false,
             'show_in_directory' => false,
+            'notify_replies' => false,
+            'notify_messages' => false,
         ]);
 
         // A batch of regular users for a populated feel

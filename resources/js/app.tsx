@@ -1,9 +1,10 @@
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../css/app.css';
 import { initializeTheme } from './hooks/use-appearance';
+import { capturePageview, identifyUser, initPostHog } from './lib/posthog';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -22,6 +23,21 @@ createInertiaApp({
                 <App {...props} />
             </StrictMode>,
         );
+
+        // Initialize PostHog
+        initPostHog();
+
+        // Identify user if authenticated
+        const auth = (props.initialPage.props as Record<string, unknown>)
+            .auth as { user?: { id: number; email: string } } | undefined;
+        if (auth?.user) {
+            identifyUser(auth.user.id, auth.user.email);
+        }
+
+        // Track Inertia page navigations
+        router.on('navigate', (event) => {
+            capturePageview(event.detail.page.url);
+        });
     },
     progress: {
         color: '#4B5563',

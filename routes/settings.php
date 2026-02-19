@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\AvatarController;
+use App\Http\Controllers\Settings\NotificationController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\PrivacyController;
 use App\Http\Controllers\Settings\ProfileController;
@@ -36,4 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
+
+    Route::get('settings/notifications', [NotificationController::class, 'edit'])->name('notifications.edit');
+    Route::patch('settings/notifications', [NotificationController::class, 'update'])->name('notifications.update');
 });

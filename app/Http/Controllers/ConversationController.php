@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreConversationRequest;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Notifications\NewMessageNotification;
+use App\Services\PostHogService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -13,6 +15,10 @@ use Inertia\Response;
 class ConversationController extends Controller
 {
     use AuthorizesRequests;
+
+    public function __construct(
+        private PostHogService $postHog,
+    ) {}
 
     /**
      * Display a listing of the user's conversations.
@@ -102,7 +108,7 @@ class ConversationController extends Controller
         }
 
         // Create the message
-        $conversation->messages()->create([
+        $message = $conversation->messages()->create([
             'user_id' => $user->id,
             'body' => $request->body,
         ]);
@@ -111,6 +117,13 @@ class ConversationController extends Controller
         $conversation->participants()
             ->where('user_id', $user->id)
             ->update(['last_read_at' => now()]);
+
+        $this->postHog->capture((string) $user->id, 'message_sent', [
+            'conversation_id' => $conversation->id,
+        ]);
+
+        // Notify the recipient
+        $recipient->notify(new NewMessageNotification($message, $conversation));
 
         return to_route('conversations.show', $conversation);
     }
