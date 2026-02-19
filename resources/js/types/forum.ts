@@ -1,5 +1,13 @@
 export type TopicVisibility = 'public' | 'private' | 'restricted';
 
+export type Media = {
+    id: number;
+    url: string;
+    original_name: string;
+    mime_type: string;
+    size: number;
+};
+
 export type Topic = {
     id: number;
     title: string;
