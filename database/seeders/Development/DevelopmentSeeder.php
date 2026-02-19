@@ -18,8 +18,8 @@ class DevelopmentSeeder extends Seeder
             LocationSeeder::class,
             TopicSeeder::class,
             DiscussionSeeder::class,
+            ReplySeeder::class,
             // Future phases:
-            // ReplySeeder::class,       // Phase 6
             // ConversationSeeder::class, // Phase 9
         ]);
     }

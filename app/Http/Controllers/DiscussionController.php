@@ -6,6 +6,7 @@ use App\Http\Requests\StoreDiscussionRequest;
 use App\Http\Requests\UpdateDiscussionRequest;
 use App\Models\Discussion;
 use App\Models\Location;
+use App\Models\Reply;
 use App\Models\Topic;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
@@ -25,6 +26,7 @@ class DiscussionController extends Controller
 
         $discussions = $topic->discussions()
             ->with(['user:id,name,username,avatar_path,preferred_name,is_deleted', 'location:id,name'])
+            ->when(request('location'), fn ($q, $locationId) => $q->byLocation((int) $locationId))
             ->orderByDesc('is_pinned')
             ->orderByDesc('last_reply_at')
             ->orderByDesc('created_at')
@@ -54,15 +56,33 @@ class DiscussionController extends Controller
             'location:id,name',
         ]);
 
+        $replies = $discussion->replies()
+            ->whereNull('parent_id')
+            ->with([
+                'user:id,name,username,avatar_path,preferred_name,is_deleted,role',
+                'children' => fn ($q) => $q->with([
+                    'user:id,name,username,avatar_path,preferred_name,is_deleted,role',
+                    'children' => fn ($q) => $q->with(
+                        'user:id,name,username,avatar_path,preferred_name,is_deleted,role',
+                    )->orderBy('created_at'),
+                ])->orderBy('created_at'),
+            ])
+            ->orderBy('created_at')
+            ->get();
+
         return Inertia::render('discussions/show', [
             'topic' => $topic,
             'discussion' => $discussion,
+            'replies' => $replies,
             'can' => [
                 'update' => request()->user()
                     ? request()->user()->can('update', $discussion)
                     : false,
                 'delete' => request()->user()
                     ? request()->user()->can('delete', $discussion)
+                    : false,
+                'reply' => request()->user()
+                    ? request()->user()->can('create', [Reply::class, $discussion])
                     : false,
             ],
         ]);

@@ -1,5 +1,5 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { MapPin, Pencil, Pin, Trash2 } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Lock, MapPin, MessageSquare, Pencil, Pin, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import {
     AlertDialog,
@@ -14,7 +14,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { SlateRenderer } from '@/components/slate-editor/renderer';
+import { ReplyForm } from '@/components/reply-form';
+import { ReplyThread } from '@/components/reply-thread';
+import type { ReplyType } from '@/components/reply-thread';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import type { Descendant } from 'slate';
@@ -59,9 +63,11 @@ type Discussion = {
 type Props = {
     topic: Topic;
     discussion: Discussion;
+    replies: ReplyType[];
     can: {
         update: boolean;
         delete: boolean;
+        reply: boolean;
     };
 };
 
@@ -80,8 +86,9 @@ function getUserInitials(user: Discussion['user']): string {
         .slice(0, 2);
 }
 
-export default function DiscussionShow({ topic, discussion, can }: Props) {
+export default function DiscussionShow({ topic, discussion, replies, can }: Props) {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const { auth } = usePage().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Forum', href: '/' },
@@ -203,6 +210,48 @@ export default function DiscussionShow({ topic, discussion, can }: Props) {
                     <div className="rounded-lg border p-6">
                         <SlateRenderer value={discussion.body} />
                     </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                        <MessageSquare className="size-5" />
+                        <h2 className="text-lg font-semibold">
+                            Replies ({discussion.reply_count})
+                        </h2>
+                    </div>
+
+                    {discussion.is_locked && (
+                        <div className="flex items-center gap-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                            <Lock className="size-4" />
+                            This discussion is locked. New replies are not allowed.
+                        </div>
+                    )}
+
+                    {replies.length > 0 ? (
+                        <ReplyThread
+                            replies={replies}
+                            discussionId={discussion.id}
+                            canReply={can.reply}
+                            isLocked={discussion.is_locked}
+                            authUserId={auth.user?.id ?? null}
+                            authUserRole={auth.user?.role ?? null}
+                        />
+                    ) : (
+                        <p className="py-4 text-center text-sm text-muted-foreground">
+                            No replies yet. Be the first to respond.
+                        </p>
+                    )}
+
+                    {can.reply && !discussion.is_locked && (
+                        <div className="pt-4">
+                            <h3 className="mb-3 text-sm font-medium">
+                                Leave a reply
+                            </h3>
+                            <ReplyForm discussionId={discussion.id} />
+                        </div>
+                    )}
                 </div>
             </div>
 

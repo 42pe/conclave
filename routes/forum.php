@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DiscussionController;
+use App\Http\Controllers\ReplyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/topics/{topic:slug}', [DiscussionController::class, 'index'])
@@ -14,14 +15,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('topics.discussions.store');
 
     Route::get('/topics/{topic:slug}/discussions/{discussion:slug}/edit', [DiscussionController::class, 'edit'])
+        ->scopeBindings()
         ->name('topics.discussions.edit');
 
     Route::patch('/topics/{topic:slug}/discussions/{discussion:slug}', [DiscussionController::class, 'update'])
+        ->scopeBindings()
         ->name('topics.discussions.update');
 
     Route::delete('/topics/{topic:slug}/discussions/{discussion:slug}', [DiscussionController::class, 'destroy'])
+        ->scopeBindings()
         ->name('topics.discussions.destroy');
+
+    Route::post('/discussions/{discussion}/replies', [ReplyController::class, 'store'])
+        ->name('discussions.replies.store');
+
+    Route::patch('/replies/{reply}', [ReplyController::class, 'update'])
+        ->name('replies.update');
+
+    Route::delete('/replies/{reply}', [ReplyController::class, 'destroy'])
+        ->name('replies.destroy');
 });
 
 Route::get('/topics/{topic:slug}/discussions/{discussion:slug}', [DiscussionController::class, 'show'])
+    ->scopeBindings()
     ->name('topics.discussions.show');
