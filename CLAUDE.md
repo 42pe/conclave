@@ -9,26 +9,34 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
-- php - 8.5.2
+- php - 8.4.17
 - inertiajs/inertia-laravel (INERTIA) - v2
 - laravel/fortify (FORTIFY) - v1
 - laravel/framework (LARAVEL) - v12
+- laravel/pint (PINT) - v1
 - laravel/prompts (PROMPTS) - v0
-- laravel/wayfinder (WAYFINDER) - v0
+- laravel/wayfinder (WAYFINDER) - v
 - laravel/boost (BOOST) - v2
 - laravel/mcp (MCP) - v0
 - laravel/pail (PAIL) - v1
-- laravel/pint (PINT) - v1
 - laravel/sail (SAIL) - v1
 - pestphp/pest (PEST) - v4
 - phpunit/phpunit (PHPUNIT) - v12
+- @inertiajs/react (INERTIA) - v2
+- react (REACT) - v19
+- tailwindcss (TAILWINDCSS) - v4
+- @laravel/vite-plugin-wayfinder (WAYFINDER) - v0
+- eslint (ESLINT) - v9
+- prettier (PRETTIER) - v3
 
 ## Skills Activation
 
 This project has domain-specific skills available. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
 
-- `wayfinder-development` — Activates whenever referencing backend routes in frontend components. Use when importing from @/actions or @/routes, calling Laravel routes from TypeScript, or working with Wayfinder route functions.
+- `wayfinder-development` — Activates whenever referencing backend routes in frontend components or using generated TypeScript types. Use when importing from @/actions or @/routes, calling Laravel routes from TypeScript, working with Wayfinder route functions, or using generated types for models, enums, shared data, or broadcast channels.
 - `pest-testing` — Tests applications using the Pest 4 PHP framework. Activates when writing tests, creating unit or feature tests, adding assertions, testing Livewire components, browser testing, debugging test failures, working with datasets or mocking; or when the user mentions test, spec, TDD, expects, assertion, coverage, or needs to verify functionality works.
+- `inertia-react-development` — Develops Inertia.js v2 React client-side applications. Activates when creating React pages, forms, or navigation; using &lt;Link&gt;, &lt;Form&gt;, useForm, or router; working with deferred props, prefetching, or polling; or when user mentions React with Inertia, React pages, React forms, or React navigation.
+- `tailwindcss-development` — Styles applications using Tailwind CSS v4 utilities. Activates when adding styles, restyling components, working with gradients, spacing, layout, flex, grid, responsive design, dark mode, colors, typography, or borders; or when the user mentions CSS, styling, classes, Tailwind, restyle, hero section, cards, buttons, or any visual/UI changes.
 - `developing-with-fortify` — Laravel Fortify headless authentication backend development. Activate when implementing authentication features including login, registration, password reset, email verification, two-factor authentication (2FA/TOTP), profile updates, headless auth, authentication scaffolding, or auth guards in Laravel applications.
 
 ## Conventions
@@ -149,6 +157,7 @@ protected function isAccessible(User $user, ?string $path = null): bool
 - Inertia creates fully client-side rendered SPAs without modern SPA complexity, leveraging existing server-side patterns.
 - Components live in `resources/js/pages` (unless specified in `vite.config.js`). Use `Inertia::render()` for server-side routing instead of Blade views.
 - ALWAYS use `search-docs` tool for version-specific Inertia documentation and updated code examples.
+- IMPORTANT: Activate `inertia-react-development` when working with Inertia client-side patterns.
 
 === inertia-laravel/v2 rules ===
 
@@ -238,24 +247,39 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 - Casts can and likely should be set in a `casts()` method on a model rather than the `$casts` property. Follow existing conventions from other models.
 
-=== wayfinder/core rules ===
-
-# Laravel Wayfinder
-
-Wayfinder generates TypeScript functions for Laravel routes. Import from `@/actions/` (controllers) or `@/routes/` (named routes).
-
-- IMPORTANT: Activate `wayfinder-development` skill whenever referencing backend routes in frontend components.
-- Invokable Controllers: `import StorePost from '@/actions/.../StorePostController'; StorePost()`.
-- Parameter Binding: Detects route keys (`{post:slug}`) — `show({ slug: "my-post" })`.
-- Query Merging: `show(1, { mergeQuery: { page: 2, sort: null } })` merges with current URL, `null` removes params.
-- Inertia: Use `.form()` with `<Form>` component or `form.submit(store())` with useForm.
-
 === pint/core rules ===
 
 # Laravel Pint Code Formatter
 
 - You must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
 - Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
+
+=== wayfinder/core rules ===
+
+# Laravel Wayfinder
+
+Wayfinder generates TypeScript functions and types for Laravel routes, models, enums, broadcast channels, and more. Import from `@/actions/` (controllers) or `@/routes/` (named routes).
+
+- IMPORTANT: Activate `wayfinder-development` skill whenever referencing backend routes in frontend components or using generated TypeScript types.
+- Invokable Controllers: `import StorePost from '@/actions/.../StorePostController'; StorePost()`.
+- Parameter Binding: Detects route keys (`{post:slug}`) — `show({ slug: "my-post" })`.
+- Query Merging: `show(1, { mergeQuery: { page: 2, sort: null } })` merges with current URL, `null` removes params.
+- Inertia: Use `.form()` with `<Form>` component or `form.submit(store())` with useForm.
+- This project uses the Vite plugin (`@laravel/vite-plugin-wayfinder`) — routes and types auto-generate when Vite is running.
+- Also generates TypeScript types for: Eloquent models, PHP enums, Inertia shared data, broadcast channels/events, and environment variables. See `config/wayfinder.php`.
+
+=== wayfinder/v rules ===
+
+# Laravel Wayfinder (dev-next)
+
+Wayfinder generates TypeScript functions and types for Laravel routes, models, enums, broadcast channels, and more. Import from `@/actions/` (controllers) or `@/routes/` (named routes).
+
+- IMPORTANT: Activate `wayfinder-development` skill whenever referencing backend routes in frontend components or using generated TypeScript types.
+- Invokable Controllers: `import StorePost from '@/actions/.../StorePostController'; StorePost()`.
+- Parameter Binding: Detects route keys (`{post:slug}`) — `show({ slug: "my-post" })`.
+- Query Merging: `show(1, { mergeQuery: { page: 2, sort: null } })` merges with current URL, `null` removes params.
+- Inertia: Use `.form()` with `<Form>` component or `form.submit(store())` with useForm.
+- Also generates TypeScript types for: Eloquent models, PHP enums, Inertia shared data, broadcast channels/events, and environment variables.
 
 === pest/core rules ===
 
@@ -266,6 +290,20 @@ Wayfinder generates TypeScript functions for Laravel routes. Import from `@/acti
 - Do NOT delete tests without approval.
 - CRITICAL: ALWAYS use `search-docs` tool for version-specific Pest documentation and updated code examples.
 - IMPORTANT: Activate `pest-testing` every time you're working with a Pest or testing-related task.
+
+=== inertia-react/core rules ===
+
+# Inertia + React
+
+- IMPORTANT: Activate `inertia-react-development` when working with Inertia React client-side patterns.
+
+=== tailwindcss/core rules ===
+
+# Tailwind CSS
+
+- Always use existing Tailwind conventions; check project patterns before adding new ones.
+- IMPORTANT: Always use `search-docs` tool for version-specific Tailwind CSS documentation and updated code examples. Never rely on training data.
+- IMPORTANT: Activate `tailwindcss-development` every time you're working with a Tailwind CSS or styling-related task.
 
 === laravel/fortify rules ===
 
