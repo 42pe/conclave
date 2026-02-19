@@ -1,10 +1,31 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { MessageSquare } from 'lucide-react';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { dashboard, login, register } from '@/routes';
+
+type Topic = {
+    id: number;
+    title: string;
+    slug: string;
+    description: string | null;
+    icon: string | null;
+    visibility: 'public' | 'private' | 'restricted';
+    discussions_count: number;
+};
 
 export default function Welcome({
     canRegister = true,
+    topics = [],
 }: {
     canRegister?: boolean;
+    topics?: Topic[];
 }) {
     const { auth } = usePage().props;
 
@@ -801,6 +822,66 @@ export default function Welcome({
                     </main>
                 </div>
                 <div className="hidden h-14.5 lg:block"></div>
+
+                {topics.length > 0 && (
+                    <section className="w-full max-w-4xl px-4 py-8">
+                        <h2 className="mb-6 text-center text-xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">
+                            Forum Topics
+                        </h2>
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {topics.map((topic) => (
+                                <Link
+                                    key={topic.id}
+                                    href={`/topics/${topic.slug}`}
+                                    className="transition-transform hover:scale-[1.02]"
+                                >
+                                    <Card className="h-full">
+                                        <CardHeader>
+                                            <div className="flex items-center justify-between">
+                                                <CardTitle className="text-base">
+                                                    {topic.icon && (
+                                                        <span className="mr-2 text-muted-foreground">
+                                                            {topic.icon}
+                                                        </span>
+                                                    )}
+                                                    {topic.title}
+                                                </CardTitle>
+                                                {topic.visibility !== 'public' && (
+                                                    <Badge
+                                                        variant={
+                                                            topic.visibility === 'restricted'
+                                                                ? 'secondary'
+                                                                : 'destructive'
+                                                        }
+                                                        className="text-xs"
+                                                    >
+                                                        {topic.visibility}
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            {topic.description && (
+                                                <CardDescription className="line-clamp-2">
+                                                    {topic.description}
+                                                </CardDescription>
+                                            )}
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                                <MessageSquare className="size-4" />
+                                                <span>
+                                                    {topic.discussions_count}{' '}
+                                                    {topic.discussions_count === 1
+                                                        ? 'discussion'
+                                                        : 'discussions'}
+                                                </span>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
             </div>
         </>
     );

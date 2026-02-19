@@ -17,8 +17,8 @@ class DevelopmentSeeder extends Seeder
             UserSeeder::class,
             LocationSeeder::class,
             TopicSeeder::class,
+            DiscussionSeeder::class,
             // Future phases:
-            // DiscussionSeeder::class,  // Phase 5
             // ReplySeeder::class,       // Phase 6
             // ConversationSeeder::class, // Phase 9
         ]);
