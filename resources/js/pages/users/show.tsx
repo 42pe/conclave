@@ -1,5 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
-import { Calendar, MessageSquare, Shield, ShieldCheck } from 'lucide-react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { Calendar, Mail, MessageSquare, Shield, ShieldCheck } from 'lucide-react';
 import { SlateRenderer } from '@/components/slate-editor';
 import UserDisplay from '@/components/user-display';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -144,6 +144,8 @@ export default function UserShow({
     discussions,
     replies,
 }: UserShowProps) {
+    const { auth } = usePage().props;
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Home', href: '/' },
         { title: 'Directory', href: '/directory' },
@@ -226,6 +228,17 @@ export default function UserShow({
                                 Joined {formatDate(profileUser.created_at)}
                             </span>
                         </div>
+
+                        {auth.user &&
+                            auth.user.id !== profileUser.id &&
+                            !profileUser.is_deleted && (
+                                <Button asChild size="sm" variant="outline">
+                                    <Link href={`/conversations/start/${profileUser.id}`}>
+                                        <Mail className="mr-1 h-4 w-4" />
+                                        Send Message
+                                    </Link>
+                                </Button>
+                            )}
                     </div>
                 </div>
 

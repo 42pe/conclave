@@ -1,4 +1,4 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     Ban,
     Pause,
@@ -78,6 +78,7 @@ function roleBadgeVariant(
 }
 
 export default function UsersIndex({ users, search }: UsersIndexProps) {
+    const { auth } = usePage().props;
     const [searchQuery, setSearchQuery] = useState(search || '');
     const [actionUserId, setActionUserId] = useState<number | null>(null);
     const [actionType, setActionType] = useState<
@@ -241,7 +242,7 @@ export default function UsersIndex({ users, search }: UsersIndexProps) {
                                         )}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        {!user.is_deleted && (
+                                        {!user.is_deleted && user.id !== (auth.user as { id: number }).id && (
                                             <div className="flex items-center justify-end gap-1">
                                                 {user.is_suspended ? (
                                                     <Button

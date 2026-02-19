@@ -40,26 +40,34 @@ const footerNavItems: NavItem[] = [
 export function AppSidebar() {
     const { auth } = usePage().props;
 
-    const mainNavItems: NavItem[] = [
-        {
-            title: 'Dashboard',
-            href: dashboard(),
-            icon: LayoutGrid,
-        },
-        {
-            title: 'Messages',
-            href: '/messages',
-            icon: Mail,
-        },
-        {
-            title: 'Directory',
-            href: '/directory',
-            icon: Users,
-        },
-        ...(auth.user?.role === 'admin'
-            ? [{ title: 'Admin', href: adminTopics(), icon: Shield }]
-            : []),
-    ];
+    const mainNavItems: NavItem[] = auth.user
+        ? [
+              {
+                  title: 'Dashboard',
+                  href: dashboard(),
+                  icon: LayoutGrid,
+              },
+              {
+                  title: 'Messages',
+                  href: '/messages',
+                  icon: Mail,
+              },
+              {
+                  title: 'Directory',
+                  href: '/directory',
+                  icon: Users,
+              },
+              ...(auth.user.role === 'admin'
+                  ? [{ title: 'Admin', href: adminTopics(), icon: Shield }]
+                  : []),
+          ]
+        : [
+              {
+                  title: 'Directory',
+                  href: '/directory',
+                  icon: Users,
+              },
+          ];
 
     return (
         <Sidebar collapsible="icon" variant="inset">

@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import { MessageSquareOff } from 'lucide-react';
 import ReplyCard from '@/components/reply-card';
 import ReplyForm from '@/components/reply-form';
@@ -59,6 +60,18 @@ export default function ReplyThread({
             {!canReply && discussionLocked && (
                 <p className="text-sm text-muted-foreground italic">
                     This discussion is locked. No new replies can be posted.
+                </p>
+            )}
+
+            {!canReply && !discussionLocked && (
+                <p className="text-sm text-muted-foreground">
+                    <Link
+                        href="/login"
+                        className="text-foreground underline hover:no-underline"
+                    >
+                        Log in
+                    </Link>{' '}
+                    to join the conversation.
                 </p>
             )}
         </div>

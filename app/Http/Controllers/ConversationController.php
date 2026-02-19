@@ -51,6 +51,26 @@ class ConversationController extends Controller
     }
 
     /**
+     * Find or create a conversation with a user and redirect to it.
+     */
+    public function start(Request $request, User $user): RedirectResponse
+    {
+        $authUser = $request->user();
+
+        abort_if($authUser->id === $user->id, 403);
+        abort_if($user->is_deleted, 404);
+
+        $conversation = Conversation::between($authUser->id, $user->id);
+
+        if (! $conversation) {
+            $conversation = Conversation::create();
+            $conversation->participants()->attach([$authUser->id, $user->id]);
+        }
+
+        return to_route('conversations.show', $conversation);
+    }
+
+    /**
      * Show a conversation.
      */
     public function show(Conversation $conversation, Request $request): Response

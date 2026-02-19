@@ -71,6 +71,8 @@ class UserModerationController extends Controller
      */
     public function suspend(Request $request, User $user, SuspendUser $suspendUser): RedirectResponse
     {
+        abort_if($request->user()->id === $user->id, 403, 'You cannot suspend yourself.');
+
         $suspendUser->suspend($user);
 
         $this->postHog->capture($request->user(), 'user_suspended', [
@@ -99,6 +101,8 @@ class UserModerationController extends Controller
      */
     public function ban(BanUserRequest $request, User $user, BanUser $banUser): RedirectResponse
     {
+        abort_if($request->user()->id === $user->id, 403, 'You cannot ban yourself.');
+
         $banUser->handle($user, $request->user(), $request->validated()['reason'] ?? null);
 
         $this->postHog->capture($request->user(), 'user_banned', [
@@ -113,6 +117,8 @@ class UserModerationController extends Controller
      */
     public function destroy(Request $request, User $user, DeleteUser $deleteUser): RedirectResponse
     {
+        abort_if($request->user()->id === $user->id, 403, 'You cannot delete yourself.');
+
         $deleteUser->handle($user);
 
         $this->postHog->capture($request->user(), 'user_deleted', [

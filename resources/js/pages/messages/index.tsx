@@ -62,7 +62,14 @@ export default function MessagesIndex({ conversations }: MessagesIndexProps) {
                         <Mail className="h-10 w-10" />
                         <p>No conversations yet.</p>
                         <p className="text-sm">
-                            Visit a user profile to start a conversation.
+                            Visit a{' '}
+                            <Link
+                                href="/directory"
+                                className="text-foreground underline hover:no-underline"
+                            >
+                                user profile
+                            </Link>{' '}
+                            to start a conversation.
                         </p>
                     </div>
                 )}

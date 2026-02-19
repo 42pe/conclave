@@ -183,6 +183,40 @@ it('delete does not add email to banned list', function () {
 
 // === Authorization ===
 
+// === Self-moderation prevention ===
+
+it('prevents admin from suspending themselves', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->post("/admin/users/{$admin->id}/suspend");
+
+    $response->assertForbidden();
+    $admin->refresh();
+    expect($admin->is_suspended)->toBeFalse();
+});
+
+it('prevents admin from banning themselves', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->post("/admin/users/{$admin->id}/ban");
+
+    $response->assertForbidden();
+    $admin->refresh();
+    expect($admin->is_deleted)->toBeFalse();
+});
+
+it('prevents admin from deleting themselves', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->delete("/admin/users/{$admin->id}");
+
+    $response->assertForbidden();
+    $admin->refresh();
+    expect($admin->is_deleted)->toBeFalse();
+});
+
+// === Authorization ===
+
 it('prevents non-admin from suspending', function () {
     $user = User::factory()->create();
     $target = User::factory()->create();

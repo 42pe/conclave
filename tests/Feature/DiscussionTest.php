@@ -177,6 +177,7 @@ test('guest can view a discussion in a public topic', function () {
             ->component('discussions/show')
             ->where('discussion.id', $discussion->id)
             ->where('auth.user', null)
+            ->where('canReply', false)
         );
 });
 

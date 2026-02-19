@@ -111,13 +111,19 @@ export default function TopicShow({
                         </div>
                     </div>
 
-                    {auth.user && (
+                    {auth.user ? (
                         <Button asChild size="sm">
                             <Link
                                 href={`/topics/${topic.slug}/discussions/create`}
                             >
                                 <Plus className="mr-1 h-4 w-4" />
                                 New Discussion
+                            </Link>
+                        </Button>
+                    ) : (
+                        <Button asChild size="sm" variant="outline">
+                            <Link href="/login">
+                                Log in to participate
                             </Link>
                         </Button>
                     )}
