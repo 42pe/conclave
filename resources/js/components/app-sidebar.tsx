@@ -1,8 +1,9 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, MessageCircle, MessageSquare, Shield, Users } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Mail, MessageCircle, MessageSquare, Shield, Users } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { Badge } from '@/components/ui/badge';
 import {
     Sidebar,
     SidebarContent,
@@ -11,6 +12,7 @@ import {
     SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
+    SidebarMenuBadge,
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
@@ -67,7 +69,7 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { auth } = usePage<{ auth: Auth }>().props;
+    const { auth, unread_messages_count } = usePage<{ auth: Auth; unread_messages_count: number }>().props;
     const { isCurrentUrl } = useCurrentUrl();
     const isAdmin = auth.user.role === 'admin';
 
@@ -87,6 +89,26 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+
+                <SidebarGroup className="px-2 py-0">
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton
+                                asChild
+                                isActive={isCurrentUrl('/messages')}
+                                tooltip={{ children: 'Messages' }}
+                            >
+                                <Link href="/messages" prefetch>
+                                    <Mail />
+                                    <span>Messages</span>
+                                </Link>
+                            </SidebarMenuButton>
+                            {unread_messages_count > 0 && (
+                                <SidebarMenuBadge>{unread_messages_count}</SidebarMenuBadge>
+                            )}
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+                </SidebarGroup>
 
                 {isAdmin && (
                     <SidebarGroup className="px-2 py-0">

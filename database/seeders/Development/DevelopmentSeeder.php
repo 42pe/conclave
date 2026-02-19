@@ -20,8 +20,7 @@ class DevelopmentSeeder extends Seeder
             DiscussionSeeder::class,
             ReplySeeder::class,
             BannedEmailSeeder::class,
-            // Future phases:
-            // ConversationSeeder::class, // Phase 9
+            ConversationSeeder::class,
         ]);
     }
 }

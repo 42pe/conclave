@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\ConversationParticipant;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -42,6 +44,29 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'unread_messages_count' => fn () => $request->user()
+                ? $this->getUnreadMessagesCount($request->user())
+                : 0,
         ];
+    }
+
+    /**
+     * Get the count of conversations with unread messages for the user.
+     */
+    private function getUnreadMessagesCount(User $user): int
+    {
+        return ConversationParticipant::query()
+            ->where('user_id', $user->id)
+            ->whereHas('conversation.messages', function ($q) use ($user) {
+                $q->where('user_id', '!=', $user->id);
+            })
+            ->where(function ($q) use ($user) {
+                $q->whereNull('last_read_at')
+                    ->orWhereHas('conversation.messages', function ($q2) use ($user) {
+                        $q2->where('user_id', '!=', $user->id)
+                            ->whereColumn('messages.created_at', '>', 'conversation_participants.last_read_at');
+                    });
+            })
+            ->count();
     }
 }
