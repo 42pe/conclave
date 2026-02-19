@@ -15,9 +15,9 @@ class DevelopmentSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
+            LocationSeeder::class,
+            TopicSeeder::class,
             // Future phases:
-            // LocationSeeder::class,   // Phase 3
-            // TopicSeeder::class,      // Phase 3
             // DiscussionSeeder::class,  // Phase 5
             // ReplySeeder::class,       // Phase 6
             // ConversationSeeder::class, // Phase 9
