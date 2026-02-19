@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Settings\AvatarController;
 use App\Http\Controllers\Settings\PasswordController;
+use App\Http\Controllers\Settings\PrivacyController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +16,12 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('settings/avatar', [AvatarController::class, 'store'])->name('avatar.store');
+    Route::delete('settings/avatar', [AvatarController::class, 'destroy'])->name('avatar.destroy');
+
+    Route::get('settings/privacy', [PrivacyController::class, 'edit'])->name('privacy.edit');
+    Route::patch('settings/privacy', [PrivacyController::class, 'update'])->name('privacy.update');
+
     Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('settings/password', [PasswordController::class, 'edit'])->name('user-password.edit');
