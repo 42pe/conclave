@@ -19,6 +19,38 @@ export type Topic = {
     sort_order: number;
     created_by: number;
     creator?: { id: number; name: string };
+    discussions_count?: number;
     created_at: string;
     updated_at: string;
+};
+
+export type Discussion = {
+    id: number;
+    topic_id: number;
+    user_id: number | null;
+    location_id: number | null;
+    title: string;
+    slug: string;
+    body: unknown[];
+    is_pinned: boolean;
+    is_locked: boolean;
+    reply_count: number;
+    last_reply_at: string | null;
+    user?: {
+        id: number;
+        name: string;
+        username: string;
+        avatar_path: string | null;
+        is_deleted: boolean;
+        display_name: string;
+    };
+    location?: { id: number; name: string } | null;
+    topic?: Topic;
+    created_at: string;
+    updated_at: string;
+};
+
+export type LocationItem = {
+    id: number;
+    name: string;
 };
