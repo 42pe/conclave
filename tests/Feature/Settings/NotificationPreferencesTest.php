@@ -33,6 +33,7 @@ test('user can update notify_replies preference', function () {
         ->patch(route('notifications.update'), [
             'notify_replies' => false,
             'notify_messages' => true,
+            'notify_mentions' => true,
         ]);
 
     $response->assertRedirect(route('notifications.edit'));
@@ -41,6 +42,7 @@ test('user can update notify_replies preference', function () {
     $user->refresh();
     expect($user->notify_replies)->toBeFalse();
     expect($user->notify_messages)->toBeTrue();
+    expect($user->notify_mentions)->toBeTrue();
 });
 
 test('user can update notify_messages preference', function () {
@@ -51,6 +53,7 @@ test('user can update notify_messages preference', function () {
         ->patch(route('notifications.update'), [
             'notify_replies' => true,
             'notify_messages' => false,
+            'notify_mentions' => true,
         ]);
 
     $response->assertRedirect(route('notifications.edit'));
@@ -59,14 +62,36 @@ test('user can update notify_messages preference', function () {
     $user->refresh();
     expect($user->notify_replies)->toBeTrue();
     expect($user->notify_messages)->toBeFalse();
+    expect($user->notify_mentions)->toBeTrue();
+});
+
+test('user can update notify_mentions preference', function () {
+    $user = User::factory()->create(['notify_mentions' => true]);
+
+    $response = $this
+        ->actingAs($user)
+        ->patch(route('notifications.update'), [
+            'notify_replies' => true,
+            'notify_messages' => true,
+            'notify_mentions' => false,
+        ]);
+
+    $response->assertRedirect(route('notifications.edit'));
+    $response->assertSessionHasNoErrors();
+
+    $user->refresh();
+    expect($user->notify_replies)->toBeTrue();
+    expect($user->notify_messages)->toBeTrue();
+    expect($user->notify_mentions)->toBeFalse();
 });
 
 // --- Defaults ---
 
-test('both notification preferences default to true for new users', function () {
+test('all notification preferences default to true for new users', function () {
     $user = User::factory()->create();
     $user->refresh();
 
     expect($user->notify_replies)->toBeTrue();
     expect($user->notify_messages)->toBeTrue();
+    expect($user->notify_mentions)->toBeTrue();
 });

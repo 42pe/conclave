@@ -369,3 +369,113 @@ test('mark with non-boolean value fails', function () {
 
     expect(makeValidator($document)->fails())->toBeTrue();
 });
+
+// --- Mention validation ---
+
+test('valid mention node passes', function () {
+    $document = [
+        [
+            'type' => 'paragraph',
+            'children' => [
+                ['text' => 'Hello '],
+                [
+                    'type' => 'mention',
+                    'userId' => 1,
+                    'username' => 'johndoe',
+                    'children' => [['text' => '']],
+                ],
+                ['text' => ' welcome!'],
+            ],
+        ],
+    ];
+
+    expect(makeValidator($document)->passes())->toBeTrue();
+});
+
+test('mention node missing userId fails', function () {
+    $document = [
+        [
+            'type' => 'paragraph',
+            'children' => [
+                [
+                    'type' => 'mention',
+                    'username' => 'johndoe',
+                    'children' => [['text' => '']],
+                ],
+            ],
+        ],
+    ];
+
+    expect(makeValidator($document)->fails())->toBeTrue();
+});
+
+test('mention node with non-integer userId fails', function () {
+    $document = [
+        [
+            'type' => 'paragraph',
+            'children' => [
+                [
+                    'type' => 'mention',
+                    'userId' => 'not-an-int',
+                    'username' => 'johndoe',
+                    'children' => [['text' => '']],
+                ],
+            ],
+        ],
+    ];
+
+    expect(makeValidator($document)->fails())->toBeTrue();
+});
+
+test('mention node missing username fails', function () {
+    $document = [
+        [
+            'type' => 'paragraph',
+            'children' => [
+                [
+                    'type' => 'mention',
+                    'userId' => 1,
+                    'children' => [['text' => '']],
+                ],
+            ],
+        ],
+    ];
+
+    expect(makeValidator($document)->fails())->toBeTrue();
+});
+
+test('mention node with non-string username fails', function () {
+    $document = [
+        [
+            'type' => 'paragraph',
+            'children' => [
+                [
+                    'type' => 'mention',
+                    'userId' => 1,
+                    'username' => 123,
+                    'children' => [['text' => '']],
+                ],
+            ],
+        ],
+    ];
+
+    expect(makeValidator($document)->fails())->toBeTrue();
+});
+
+test('mention node with invalid children fails', function () {
+    $document = [
+        [
+            'type' => 'paragraph',
+            'children' => [
+                [
+                    'type' => 'mention',
+                    'userId' => 1,
+                    'username' => 'johndoe',
+                    'children' => [['text' => 'non-empty']],
+                ],
+            ],
+        ],
+    ];
+
+    expect(makeValidator($document)->fails())->toBeTrue();
+});

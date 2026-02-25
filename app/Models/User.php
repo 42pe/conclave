@@ -42,6 +42,7 @@ class User extends Authenticatable
         'show_in_directory',
         'notify_replies',
         'notify_messages',
+        'notify_mentions',
     ];
 
     /**
@@ -83,6 +84,7 @@ class User extends Authenticatable
             'show_in_directory' => 'boolean',
             'notify_replies' => 'boolean',
             'notify_messages' => 'boolean',
+            'notify_mentions' => 'boolean',
         ];
     }
 

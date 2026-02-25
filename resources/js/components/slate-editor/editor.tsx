@@ -6,7 +6,8 @@ import { withHistory } from "slate-history";
 import { Editable, Slate, withReact } from "slate-react";
 import { Element } from "./elements";
 import { Leaf } from "./leaves";
-import { withVoidElements } from "./plugins";
+import { MentionAutocomplete } from "./mention-autocomplete";
+import { withMentions, withVoidElements } from "./plugins";
 import { Toolbar, toggleMark } from "./toolbar";
 import type { MarkType } from "./types";
 import { DEFAULT_INITIAL_VALUE } from "./types";
@@ -22,6 +23,7 @@ interface SlateEditorProps {
     onChange?: (value: Descendant[]) => void;
     placeholder?: string;
     readOnly?: boolean;
+    enableMentions?: boolean;
     onUploadMedia?: (file: File) => Promise<{ url: string; original_name: string; mime_type: string } | null>;
 }
 
@@ -30,12 +32,16 @@ export function SlateEditor({
     onChange,
     placeholder = "Start writing...",
     readOnly = false,
+    enableMentions = false,
     onUploadMedia,
 }: SlateEditorProps) {
-    const editor = useMemo(
-        () => withVoidElements(withHistory(withReact(createEditor()))),
-        [],
-    );
+    const editor = useMemo(() => {
+        let e = withVoidElements(withHistory(withReact(createEditor())));
+        if (enableMentions) {
+            e = withMentions(e);
+        }
+        return e;
+    }, [enableMentions]);
 
     const handleKeyDown = useCallback(
         (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -74,15 +80,18 @@ export function SlateEditor({
                 }}
             >
                 {!readOnly && <Toolbar onUploadMedia={onUploadMedia} />}
-                <Editable
-                    readOnly={readOnly}
-                    placeholder={placeholder}
-                    className="min-h-[150px] px-3 py-2 text-sm focus:outline-none"
-                    renderElement={renderElement}
-                    renderLeaf={renderLeaf}
-                    onKeyDown={readOnly ? undefined : handleKeyDown}
-                    spellCheck
-                />
+                <div className="relative">
+                    <Editable
+                        readOnly={readOnly}
+                        placeholder={placeholder}
+                        className="min-h-[150px] px-3 py-2 text-sm focus:outline-none"
+                        renderElement={renderElement}
+                        renderLeaf={renderLeaf}
+                        onKeyDown={readOnly ? undefined : handleKeyDown}
+                        spellCheck
+                    />
+                    {enableMentions && !readOnly && <MentionAutocomplete />}
+                </div>
             </Slate>
         </div>
     );

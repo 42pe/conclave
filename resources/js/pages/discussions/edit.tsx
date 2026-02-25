@@ -109,6 +109,7 @@ export default function DiscussionEdit({
                             initialValue={discussion.body}
                             onChange={handleEditorChange}
                             placeholder="Write your discussion content..."
+                            enableMentions
                         />
                         <InputError message={errors.body} />
                     </div>

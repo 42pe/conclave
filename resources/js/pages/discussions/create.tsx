@@ -90,6 +90,7 @@ export default function DiscussionCreate({ topic, locations }: Props) {
                         <SlateEditor
                             onChange={handleEditorChange}
                             placeholder="Write your discussion content..."
+                            enableMentions
                         />
                         <InputError message={errors.body} />
                     </div>

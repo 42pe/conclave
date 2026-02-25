@@ -4,7 +4,7 @@ import { createEditor } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
 import { Element } from "./elements";
 import { Leaf } from "./leaves";
-import { withVoidElements } from "./plugins";
+import { withMentions, withVoidElements } from "./plugins";
 import { DEFAULT_INITIAL_VALUE } from "./types";
 
 interface SlateRendererProps {
@@ -13,7 +13,7 @@ interface SlateRendererProps {
 
 export function SlateRenderer({ value }: SlateRendererProps) {
     const editor = useMemo(
-        () => withVoidElements(withReact(createEditor())),
+        () => withMentions(withVoidElements(withReact(createEditor()))),
         [],
     );
 

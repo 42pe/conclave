@@ -8,6 +8,7 @@ use App\Models\Discussion;
 use App\Models\Reply;
 use App\Models\User;
 use App\Notifications\NewReplyNotification;
+use App\Services\MentionService;
 use App\Services\PostHogService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +19,7 @@ class ReplyController extends Controller
 
     public function __construct(
         private PostHogService $postHog,
+        private MentionService $mentions,
     ) {}
 
     /**
@@ -47,6 +49,13 @@ class ReplyController extends Controller
         ]);
 
         $this->sendReplyNotifications($reply, $discussion, $request->user());
+
+        $this->mentions->notifyMentionedUsers(
+            $request->validated('body'),
+            $request->user(),
+            $discussion,
+            $reply,
+        );
 
         return back();
     }

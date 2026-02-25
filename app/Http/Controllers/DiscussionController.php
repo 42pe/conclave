@@ -8,6 +8,7 @@ use App\Models\Discussion;
 use App\Models\Location;
 use App\Models\Reply;
 use App\Models\Topic;
+use App\Services\MentionService;
 use App\Services\PostHogService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
@@ -20,6 +21,7 @@ class DiscussionController extends Controller
 
     public function __construct(
         private PostHogService $postHog,
+        private MentionService $mentions,
     ) {}
 
     /**
@@ -131,6 +133,12 @@ class DiscussionController extends Controller
             'topic_id' => $topic->id,
         ]);
 
+        $this->mentions->notifyMentionedUsers(
+            $request->validated('body'),
+            $request->user(),
+            $discussion,
+        );
+
         return to_route('topics.discussions.show', [$topic, $discussion]);
     }
 
@@ -156,6 +164,12 @@ class DiscussionController extends Controller
         $this->authorize('update', $discussion);
 
         $discussion->update($request->validated());
+
+        $this->mentions->notifyMentionedUsers(
+            $request->validated('body'),
+            $request->user(),
+            $discussion,
+        );
 
         return to_route('topics.discussions.show', [$topic, $discussion]);
     }

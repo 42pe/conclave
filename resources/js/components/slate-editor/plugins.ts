@@ -1,6 +1,6 @@
 import { Editor, Element as SlateElement, Transforms } from "slate";
 import type { BlockType } from "./types";
-import { VOID_TYPES } from "./types";
+import { INLINE_TYPES, VOID_TYPES } from "./types";
 
 function withVoidElements(editor: Editor): Editor {
     const { isVoid } = editor;
@@ -56,4 +56,41 @@ function insertDocument(
     });
 }
 
-export { insertDocument, insertImage, insertVideo, withVoidElements };
+function withMentions(editor: Editor): Editor {
+    const { isInline, isVoid } = editor;
+
+    editor.isInline = (element: SlateElement) => {
+        return INLINE_TYPES.includes(element.type as (typeof INLINE_TYPES)[number])
+            ? true
+            : isInline(element);
+    };
+
+    editor.isVoid = (element: SlateElement) => {
+        return element.type === "mention" ? true : isVoid(element);
+    };
+
+    return editor;
+}
+
+function insertMention(
+    editor: Editor,
+    userId: number,
+    username: string,
+): void {
+    Transforms.insertNodes(editor, {
+        type: "mention",
+        userId,
+        username,
+        children: [{ text: "" }],
+    });
+    Transforms.move(editor);
+}
+
+export {
+    insertDocument,
+    insertImage,
+    insertMention,
+    insertVideo,
+    withMentions,
+    withVoidElements,
+};

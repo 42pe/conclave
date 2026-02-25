@@ -4,10 +4,15 @@ use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\DiscussionController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\UserSearchController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/directory', [DirectoryController::class, 'index'])
     ->name('directory.index');
+
+Route::get('/users/search', UserSearchController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('users.search');
 
 Route::get('/users/{user:username}', [UserProfileController::class, 'show'])
     ->name('users.show');

@@ -23,6 +23,7 @@ export default function Notifications() {
     const { data, setData, patch, processing, recentlySuccessful } = useForm({
         notify_replies: auth.user.notify_replies,
         notify_messages: auth.user.notify_messages,
+        notify_mentions: auth.user.notify_mentions,
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -84,6 +85,26 @@ export default function Notifications() {
                                     checked={data.notify_messages}
                                     onCheckedChange={(checked) =>
                                         setData('notify_messages', checked)
+                                    }
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <Label
+                                    htmlFor="notify_mentions"
+                                    className="flex-1 cursor-pointer"
+                                >
+                                    <div>Email on mentions</div>
+                                    <p className="text-sm font-normal text-muted-foreground">
+                                        Receive an email when someone mentions
+                                        you in a discussion or reply
+                                    </p>
+                                </Label>
+                                <Switch
+                                    id="notify_mentions"
+                                    checked={data.notify_mentions}
+                                    onCheckedChange={(checked) =>
+                                        setData('notify_mentions', checked)
                                     }
                                 />
                             </div>

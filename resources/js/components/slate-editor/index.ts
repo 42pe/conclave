@@ -1,7 +1,8 @@
 export { SlateEditor } from "./editor";
 export { Element } from "./elements";
 export { Leaf } from "./leaves";
-export { insertDocument, insertImage, insertVideo, withVoidElements } from "./plugins";
+export { MentionAutocomplete } from "./mention-autocomplete";
+export { insertDocument, insertImage, insertMention, insertVideo, withMentions, withVoidElements } from "./plugins";
 export { SlateRenderer } from "./renderer";
 export { Toolbar } from "./toolbar";
 export type { BlockType, MarkType } from "./types";

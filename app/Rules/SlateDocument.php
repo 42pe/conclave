@@ -34,6 +34,11 @@ class SlateDocument implements ValidationRule
     ];
 
     /** @var list<string> */
+    private const INLINE_VOID_TYPES = [
+        'mention',
+    ];
+
+    /** @var list<string> */
     private const ALLOWED_MARKS = [
         'bold',
         'italic',
@@ -104,6 +109,11 @@ class SlateDocument implements ValidationRule
             return false;
         }
 
+        // Inline void elements (e.g. mention)
+        if (in_array($node['type'], self::INLINE_VOID_TYPES, true)) {
+            return $this->validateInlineVoidNode($node, $fail);
+        }
+
         if (! in_array($node['type'], self::ALLOWED_BLOCK_TYPES, true)) {
             $fail('The :attribute contains an unsupported block type: '.$node['type'].'.');
 
@@ -129,6 +139,43 @@ class SlateDocument implements ValidationRule
             if (! $this->validateNode($child, $depth + 1, $fail)) {
                 return false;
             }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param  array<string, mixed>  $node
+     */
+    private function validateInlineVoidNode(array $node, Closure $fail): bool
+    {
+        if ($node['type'] === 'mention') {
+            if (! isset($node['userId']) || ! is_int($node['userId'])) {
+                $fail('The :attribute contains a mention without a valid userId.');
+
+                return false;
+            }
+
+            if (! isset($node['username']) || ! is_string($node['username'])) {
+                $fail('The :attribute contains a mention without a valid username.');
+
+                return false;
+            }
+        }
+
+        if (! isset($node['children']) || ! is_array($node['children'])) {
+            $fail('The :attribute contains an inline element without children.');
+
+            return false;
+        }
+
+        // Void inline elements must have exactly one empty text child
+        if (count($node['children']) !== 1
+            || ! array_key_exists('text', $node['children'][0])
+            || ($node['children'][0]['text'] !== '' && $node['children'][0]['text'] !== null)) {
+            $fail('The :attribute contains a void inline element with invalid children.');
+
+            return false;
         }
 
         return true;

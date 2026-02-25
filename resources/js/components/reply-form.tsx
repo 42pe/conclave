@@ -47,6 +47,7 @@ export function ReplyForm({
                 initialValue={DEFAULT_INITIAL_VALUE}
                 onChange={(value) => form.setData('body', value)}
                 placeholder={placeholder}
+                enableMentions
             />
             {form.errors.body && (
                 <p className="text-sm text-destructive">{form.errors.body}</p>

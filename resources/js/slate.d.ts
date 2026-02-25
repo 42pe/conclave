@@ -70,6 +70,13 @@ type DocumentEmbedElement = {
     children: [CustomText];
 };
 
+type MentionElement = {
+    type: "mention";
+    userId: number;
+    username: string;
+    children: [CustomText];
+};
+
 type CustomElement =
     | ParagraphElement
     | HeadingOneElement
@@ -81,7 +88,8 @@ type CustomElement =
     | BlockquoteElement
     | ImageElement
     | VideoElement
-    | DocumentEmbedElement;
+    | DocumentEmbedElement
+    | MentionElement;
 
 declare module "slate" {
     interface CustomTypes {

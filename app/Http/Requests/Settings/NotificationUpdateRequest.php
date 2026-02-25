@@ -17,6 +17,7 @@ class NotificationUpdateRequest extends FormRequest
         return [
             'notify_replies' => ['required', 'boolean'],
             'notify_messages' => ['required', 'boolean'],
+            'notify_mentions' => ['required', 'boolean'],
         ];
     }
 }

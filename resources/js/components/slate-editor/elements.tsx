@@ -79,6 +79,18 @@ export function Element({ attributes, children, element }: RenderElementProps) {
                     {children}
                 </div>
             );
+        case "mention":
+            return (
+                <span {...attributes} contentEditable={false}>
+                    <a
+                        href={`/users/${element.username}`}
+                        className="inline rounded bg-primary/10 px-1 py-0.5 text-sm font-medium text-primary hover:underline"
+                    >
+                        @{element.username}
+                    </a>
+                    {children}
+                </span>
+            );
         default:
             return (
                 <p className="mb-1" {...attributes}>
