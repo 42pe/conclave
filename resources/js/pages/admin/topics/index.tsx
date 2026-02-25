@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { DynamicIcon } from '@/components/dynamic-icon';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -131,12 +132,16 @@ export default function TopicsIndex({ topics }: { topics: Topic[] }) {
                                 topics.map((topic) => (
                                     <TableRow key={topic.id}>
                                         <TableCell className="font-medium">
-                                            {topic.icon && (
-                                                <span className="mr-2">
-                                                    {topic.icon}
-                                                </span>
-                                            )}
-                                            {topic.title}
+                                            <span className="flex items-center gap-2">
+                                                {topic.icon && (
+                                                    <DynamicIcon
+                                                        name={topic.icon}
+                                                        className="size-4 text-muted-foreground"
+                                                        fallback={false}
+                                                    />
+                                                )}
+                                                {topic.title}
+                                            </span>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
                                             {topic.slug}

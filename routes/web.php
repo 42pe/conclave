@@ -2,6 +2,7 @@
 
 use App\Enums\TopicVisibility;
 use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MessageController;
 use App\Models\Topic;
@@ -29,9 +30,9 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('dashboard', DashboardController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::post('media/upload', [MediaController::class, 'store'])
     ->middleware(['auth', 'verified'])

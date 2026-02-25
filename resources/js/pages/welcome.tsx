@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { MessageSquare } from 'lucide-react';
+import { DynamicIcon } from '@/components/dynamic-icon';
 import {
     Card,
     CardContent,
@@ -838,11 +839,13 @@ export default function Welcome({
                                     <Card className="h-full">
                                         <CardHeader>
                                             <div className="flex items-center justify-between">
-                                                <CardTitle className="text-base">
+                                                <CardTitle className="flex items-center gap-2 text-base">
                                                     {topic.icon && (
-                                                        <span className="mr-2 text-muted-foreground">
-                                                            {topic.icon}
-                                                        </span>
+                                                        <DynamicIcon
+                                                            name={topic.icon}
+                                                            className="size-4 text-muted-foreground"
+                                                            fallback={false}
+                                                        />
                                                     )}
                                                     {topic.title}
                                                 </CardTitle>

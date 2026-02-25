@@ -1,3 +1,4 @@
+import { DynamicIcon } from '@/components/dynamic-icon';
 import { Badge } from '@/components/ui/badge';
 
 type Topic = {
@@ -15,9 +16,11 @@ export function TopicHeader({ topic }: { topic: Topic }) {
         <div className="space-y-2">
             <div className="flex items-center gap-3">
                 {topic.icon && (
-                    <span className="text-2xl text-muted-foreground">
-                        {topic.icon}
-                    </span>
+                    <DynamicIcon
+                        name={topic.icon}
+                        className="size-6 text-muted-foreground"
+                        fallback={false}
+                    />
                 )}
                 <div>
                     <div className="flex items-center gap-2">

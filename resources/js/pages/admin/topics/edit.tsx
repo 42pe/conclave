@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
 import Heading from '@/components/heading';
+import { IconPicker } from '@/components/icon-picker';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -95,12 +96,10 @@ export default function TopicEdit({ topic }: { topic: Topic }) {
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="icon">Icon</Label>
-                        <Input
-                            id="icon"
+                        <Label>Icon</Label>
+                        <IconPicker
                             value={data.icon}
-                            onChange={(e) => setData('icon', e.target.value)}
-                            placeholder="Icon name (e.g., MessageCircle)"
+                            onChange={(value) => setData('icon', value)}
                         />
                         <InputError message={errors.icon} />
                     </div>
