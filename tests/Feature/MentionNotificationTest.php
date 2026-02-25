@@ -96,7 +96,7 @@ test('no self-mention notification', function () {
 
 // --- Disabled preference ---
 
-test('MentionNotification not sent when user has notify_mentions disabled', function () {
+test('MentionNotification email not sent when user has notify_mentions disabled', function () {
     Notification::fake();
 
     $author = User::factory()->create();
@@ -111,8 +111,12 @@ test('MentionNotification not sent when user has notify_mentions disabled', func
     $service = new MentionService;
     $service->notifyMentionedUsers($discussion->body, $author, $discussion);
 
-    // When via() returns [], Notification::fake() doesn't record the notification
-    Notification::assertNotSentTo($mentioned, MentionNotification::class);
+    // Database notification is still sent, but email channel is excluded
+    Notification::assertSentTo(
+        $mentioned,
+        MentionNotification::class,
+        fn ($notification, $channels) => in_array('database', $channels) && ! in_array('mail', $channels),
+    );
 });
 
 // --- Integration: controller calls MentionService ---

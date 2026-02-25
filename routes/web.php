@@ -5,6 +5,7 @@ use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NotificationPanelController;
 use App\Models\Topic;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -39,6 +40,13 @@ Route::post('media/upload', [MediaController::class, 'store'])
     ->name('media.upload');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('notifications', [NotificationPanelController::class, 'index'])
+        ->name('notifications.index');
+    Route::post('notifications/mark-all-read', [NotificationPanelController::class, 'markAllAsRead'])
+        ->name('notifications.markAllAsRead');
+    Route::post('notifications/{id}/read', [NotificationPanelController::class, 'markAsRead'])
+        ->name('notifications.markAsRead');
+
     Route::get('messages', [ConversationController::class, 'index'])
         ->name('conversations.index');
     Route::post('messages', [ConversationController::class, 'store'])

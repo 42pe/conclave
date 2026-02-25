@@ -25,11 +25,28 @@ class NewReplyNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        if (! $notifiable->notify_replies) {
-            return [];
-        }
+        return $notifiable->notify_replies ? ['database', 'mail'] : ['database'];
+    }
 
-        return ['mail'];
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'type' => 'new_reply',
+            'reply_id' => $this->reply->id,
+            'discussion_id' => $this->discussion->id,
+            'discussion_title' => $this->discussion->title,
+            'discussion_slug' => $this->discussion->slug,
+            'topic_id' => $this->discussion->topic_id,
+            'topic_slug' => $this->discussion->topic?->slug,
+            'replier_name' => $this->reply->user?->display_name ?? 'Someone',
+            'replier_username' => $this->reply->user?->username,
+            'replier_avatar' => $this->reply->user?->avatar_path,
+        ];
     }
 
     /**

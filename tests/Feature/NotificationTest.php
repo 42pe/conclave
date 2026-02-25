@@ -101,7 +101,7 @@ test('no self-notification when replying to own discussion', function () {
     Notification::assertNotSentTo($user, NewReplyNotification::class);
 });
 
-test('NewReplyNotification not sent when user has notify_replies disabled', function () {
+test('NewReplyNotification email not sent when user has notify_replies disabled', function () {
     Notification::fake();
     $this->mock(PostHogService::class)->shouldReceive('capture');
 
@@ -119,8 +119,12 @@ test('NewReplyNotification not sent when user has notify_replies disabled', func
             'body' => notifSlateBody(),
         ]);
 
-    // When via() returns [], Notification::fake() doesn't record the notification
-    Notification::assertNotSentTo($author, NewReplyNotification::class);
+    // Database notification is still sent, but email channel is excluded
+    Notification::assertSentTo(
+        $author,
+        NewReplyNotification::class,
+        fn ($notification, $channels) => in_array('database', $channels) && ! in_array('mail', $channels),
+    );
 });
 
 // --- Message notifications ---
@@ -159,7 +163,7 @@ test('no self-notification for messages', function () {
     Notification::assertNotSentTo($sender, NewMessageNotification::class);
 });
 
-test('NewMessageNotification not sent when user has notify_messages disabled', function () {
+test('NewMessageNotification email not sent when user has notify_messages disabled', function () {
     Notification::fake();
     $this->mock(PostHogService::class)->shouldReceive('capture');
 
@@ -173,6 +177,10 @@ test('NewMessageNotification not sent when user has notify_messages disabled', f
             'body' => notifSlateBody(),
         ]);
 
-    // When via() returns [], Notification::fake() doesn't record the notification
-    Notification::assertNotSentTo($recipient, NewMessageNotification::class);
+    // Database notification is still sent, but email channel is excluded
+    Notification::assertSentTo(
+        $recipient,
+        NewMessageNotification::class,
+        fn ($notification, $channels) => in_array('database', $channels) && ! in_array('mail', $channels),
+    );
 });

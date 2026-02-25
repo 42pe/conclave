@@ -9,7 +9,7 @@
 
 Hierarchy: **Topics > Discussions > Replies**
 
-10 phases, each independently deployable with its own migrations, models, controllers, pages, factories, seeders, Pest tests, and Playwright E2E tests.
+13 phases, each independently deployable with its own migrations, models, controllers, pages, factories, seeders, Pest tests, and Playwright E2E tests.
 
 ---
 
@@ -134,6 +134,9 @@ Each phase includes a dedicated **Development Seeder** that populates the databa
 | 8 | — | Suspended/deleted/banned users already seeded from Phase 1; `BannedEmailSeeder` for banned email list |
 | 9 | `ConversationSeeder` | Conversations between users with multiple messages, unread state |
 | 10 | — | Notification preferences set on seeded users |
+| 11 | — | No new seeders (dashboard uses existing data) |
+| 12 | `UserSeeder` (update) | Set `notify_mentions` preferences on some users |
+| 13 | `NotificationSeeder` | Sample database notifications for dev users |
 
 ### Seeder Design Principles
 - All seeded users use `password` as their password for easy login
@@ -687,6 +690,117 @@ body JSON NOT NULL, timestamps
 
 ---
 
+## Phase 11: Icon Picker & Dashboard Enhancements
+
+**Goal:** Replace text-based icon selection with a searchable Lucide icon picker, fix icon rendering across all pages, and build a real dashboard with activity summaries.
+
+**Agent assignments:**
+- **Senior Developer** → Icon picker component, dynamic icon rendering, DashboardController, dashboard page redesign
+- **QA Engineer** → Pest tests for dashboard props, icon rendering validation
+- **Senior Engineer** → Review icon map approach (tree-shaking), validate dashboard queries for N+1
+- **Product Owner** → Verify icon picker UX, verify icons render across all pages, verify dashboard data accuracy
+
+### Backend
+- `app/Http/Controllers/DashboardController.php` (new, invokable) — passes userStats, recentReplies (deferred), activeTopics (deferred), recentDiscussions (deferred)
+- Update `routes/web.php` — replace inline dashboard closure with DashboardController
+
+### Frontend — Icon System
+- `resources/js/lib/lucide-icons.ts` — curated map of ~50 Lucide icons (`Record<string, LucideIcon>`), `getIconComponent(name)` helper
+- `resources/js/components/icon-picker.tsx` — searchable icon picker using Dialog + Input + scrollable grid
+- `resources/js/components/dynamic-icon.tsx` — renders Lucide component from string name with fallback
+- Update `resources/js/pages/admin/topics/create.tsx` — replace Input with IconPicker
+- Update `resources/js/pages/admin/topics/edit.tsx` — replace Input with IconPicker
+- Update `resources/js/pages/admin/topics/index.tsx` — replace string with DynamicIcon
+- Update `resources/js/components/topic-header.tsx` — replace string with DynamicIcon
+- Update `resources/js/pages/welcome.tsx` — replace string with DynamicIcon
+
+### Frontend — Dashboard
+- Update `resources/js/pages/dashboard.tsx` — replace placeholder with stat cards (Your Stats, Unread Messages, Quick Actions) + deferred sections (Recent Replies, Active Topics, Recent Discussions) with Skeleton loading
+
+### Pest Tests
+- Update `tests/Feature/DashboardTest.php` — assert Inertia props (userStats, recentReplies, activeTopics, recentDiscussions)
+
+---
+
+## Phase 12: @Mentions in Slate Editor
+
+**Goal:** Add @mention autocomplete to Slate editor for discussions and replies (not messages). Store mentions with user_id. Render as profile links. Generate notifications.
+
+**Agent assignments:**
+- **Senior Developer** → Mention Slate plugin, autocomplete component, MentionService, notification, user search API
+- **QA Engineer** → Pest tests for user search, mention extraction, mention notifications, SlateDocument validation
+- **Senior Engineer** → Review Slate inline+void pattern, validate mention node validation, review notification deduplication
+- **Product Owner** → Verify @mention autocomplete UX, verify mention links in rendered content, verify notifications fire
+
+### Backend
+- `app/Http/Controllers/UserSearchController.php` (invokable) — `GET /users/search?q=...` returns JSON, auth required
+- `app/Services/MentionService.php` — extract mention user IDs from Slate document, send MentionNotification
+- `app/Notifications/MentionNotification.php` — email notification, respects `notify_mentions` preference
+- Migration: `add_notify_mentions_to_users_table` — `notify_mentions BOOLEAN DEFAULT TRUE`
+- Update `app/Rules/SlateDocument.php` — allow `mention` inline type, validate `userId` and `username`
+- Update `app/Http/Controllers/DiscussionController.php` — inject MentionService, call after store/update
+- Update `app/Http/Controllers/ReplyController.php` — inject MentionService, call after store
+- Update `app/Models/User.php` — add `notify_mentions` to fillable + casts
+- Update `app/Http/Controllers/Settings/NotificationController.php` — include `notify_mentions`
+- Update `app/Http/Requests/Settings/NotificationUpdateRequest.php` — add `notify_mentions` validation
+- Route: `GET /users/search` in `routes/forum.php` with auth + verified
+
+### Frontend
+- `resources/js/components/slate-editor/mention-autocomplete.tsx` — autocomplete dropdown, cursor-positioned, debounced API search
+- Update `resources/js/slate.d.ts` — add MentionElement type
+- Update `resources/js/components/slate-editor/types.ts` — add `"mention"` to VOID_TYPES
+- Update `resources/js/components/slate-editor/plugins.ts` — `withMentions` plugin (isInline + isVoid), `insertMention()` function
+- Update `resources/js/components/slate-editor/editor.tsx` — chain `withMentions`, add `enableMentions` prop, render MentionAutocomplete
+- Update `resources/js/components/slate-editor/elements.tsx` — add `mention` case (render as `<a>` link)
+- Update `resources/js/pages/discussions/create.tsx` — pass `enableMentions={true}`
+- Update `resources/js/pages/discussions/edit.tsx` — pass `enableMentions={true}`
+- Update `resources/js/components/reply-form.tsx` — pass `enableMentions={true}`
+- Update `resources/js/pages/settings/notifications.tsx` — add `notify_mentions` toggle
+
+### Pest Tests
+- `tests/Feature/UserSearchTest.php` — search results, excludes deleted/self, min chars, max results, auth
+- `tests/Feature/MentionServiceTest.php` — extract IDs, nesting, dedup, excludes author/deleted
+- `tests/Feature/MentionNotificationTest.php` — sent on create, no self-mention, respects preference
+- Update `tests/Feature/Rules/SlateDocumentTest.php` — valid/invalid mention nodes
+- Update `tests/Feature/Settings/NotificationPreferencesTest.php` — include notify_mentions
+
+---
+
+## Phase 13: In-App Notifications Panel
+
+**Goal:** Database-backed notifications with bell icon, notification panel, mark-as-read. All notifications stored in DB; email remains optional per preference.
+
+**Agent assignments:**
+- **Senior Developer** → Notifications table, NotificationPanelController, notification panel/bell components, update via() on all notifications
+- **QA Engineer** → Pest tests for notification API, update existing notification tests for database channel
+- **Senior Engineer** → Review via() changes (breaking test impact), validate notification data structure, review panel UX
+- **Product Owner** → Verify notification bell badge, verify panel lists all notification types, verify mark-as-read, verify email preferences still work
+
+### Backend
+- Migration: `create_notifications_table` (via `php artisan notifications:table`) — standard Laravel notifications schema
+- `app/Http/Controllers/NotificationPanelController.php` — JSON API: index (last 20), markAsRead, markAllAsRead
+- Update `app/Notifications/NewReplyNotification.php` — always include `'database'` in via(), add `toArray()`
+- Update `app/Notifications/NewMessageNotification.php` — always include `'database'` in via(), add `toArray()`
+- Update `app/Notifications/MentionNotification.php` — always include `'database'` in via(), add `toArray()`
+- Update `app/Http/Middleware/HandleInertiaRequests.php` — share `unread_notifications_count`
+- Routes: `GET /notifications`, `POST /notifications/{id}/read`, `POST /notifications/mark-all-read`
+
+### Frontend
+- `resources/js/components/notification-panel.tsx` — Sheet panel fetching from `/notifications` API, renders by type, unread indicators, mark-as-read
+- `resources/js/components/notification-bell.tsx` — Bell icon + badge from shared `unread_notifications_count`
+- Update `resources/js/components/app-sidebar.tsx` — add NotificationBell
+- Update `resources/js/pages/settings/notifications.tsx` — clarify toggles are for email only
+
+### Pest Tests
+- `tests/Feature/InAppNotificationTest.php` — fetch, mark read, mark all read, only own, auth required
+- Update `tests/Feature/NotificationTest.php` — fix assertNotSentTo → assertSentTo with channel check (via() always returns ['database'] now)
+- Update `tests/Feature/MessageTest.php` — unread notifications count shared
+
+### Development Data Seeders
+- `database/seeders/Development/NotificationSeeder.php` — seed sample notifications for dev users
+
+---
+
 ## Verification Strategy
 
 After each phase, the following checks must pass before the **Senior Engineer** signs off:
@@ -719,3 +833,10 @@ After each phase, the following checks must pass before the **Senior Engineer** 
 | `resources/js/pages/settings/profile.tsx` | 1, 2 |
 | `resources/js/layouts/settings/layout.tsx` | 2, 10 |
 | `bootstrap/app.php` | 8 (suspended middleware) |
+| `resources/js/components/slate-editor/editor.tsx` | 12 (mentions plugin) |
+| `resources/js/components/slate-editor/elements.tsx` | 12 (mention rendering) |
+| `resources/js/components/slate-editor/types.ts` | 12 (mention type) |
+| `app/Rules/SlateDocument.php` | 12 (mention validation) |
+| `app/Notifications/NewReplyNotification.php` | 13 (database channel) |
+| `app/Notifications/NewMessageNotification.php` | 13 (database channel) |
+| `resources/js/pages/dashboard.tsx` | 11 (dashboard redesign) |

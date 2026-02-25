@@ -3,6 +3,7 @@ import { BookOpen, Folder, LayoutGrid, Mail, MessageCircle, MessageSquare, Shiel
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { NotificationPanel } from '@/components/notification-panel';
 import { Badge } from '@/components/ui/badge';
 import {
     Sidebar,
@@ -69,7 +70,11 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { auth, unread_messages_count } = usePage<{ auth: Auth; unread_messages_count: number }>().props;
+    const { auth, unread_messages_count, unread_notifications_count } = usePage<{
+        auth: Auth;
+        unread_messages_count: number;
+        unread_notifications_count: number;
+    }>().props;
     const { isCurrentUrl } = useCurrentUrl();
     const isAdmin = auth.user.role === 'admin';
 
@@ -107,6 +112,7 @@ export function AppSidebar() {
                                 <SidebarMenuBadge>{unread_messages_count}</SidebarMenuBadge>
                             )}
                         </SidebarMenuItem>
+                        <NotificationPanel unreadCount={unread_notifications_count} />
                     </SidebarMenu>
                 </SidebarGroup>
 

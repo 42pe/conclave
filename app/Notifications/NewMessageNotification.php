@@ -25,11 +25,24 @@ class NewMessageNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        if (! $notifiable->notify_messages) {
-            return [];
-        }
+        return $notifiable->notify_messages ? ['database', 'mail'] : ['database'];
+    }
 
-        return ['mail'];
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'type' => 'new_message',
+            'conversation_id' => $this->conversation->id,
+            'message_id' => $this->message->id,
+            'sender_name' => $this->message->user?->display_name ?? 'Someone',
+            'sender_username' => $this->message->user?->username,
+            'sender_avatar' => $this->message->user?->avatar_path,
+        ];
     }
 
     /**

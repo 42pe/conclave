@@ -47,6 +47,9 @@ class HandleInertiaRequests extends Middleware
             'unread_messages_count' => fn () => $request->user()
                 ? $this->getUnreadMessagesCount($request->user())
                 : 0,
+            'unread_notifications_count' => fn () => $request->user()
+                ? $request->user()->unreadNotifications()->count()
+                : 0,
         ];
     }
 

@@ -27,11 +27,27 @@ class MentionNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        if (! $notifiable->notify_mentions) {
-            return [];
-        }
+        return $notifiable->notify_mentions ? ['database', 'mail'] : ['database'];
+    }
 
-        return ['mail'];
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'type' => 'mention',
+            'discussion_id' => $this->discussion->id,
+            'discussion_title' => $this->discussion->title,
+            'discussion_slug' => $this->discussion->slug,
+            'topic_id' => $this->discussion->topic_id,
+            'topic_slug' => $this->discussion->topic?->slug,
+            'mentioner_name' => $this->mentioner->display_name,
+            'mentioner_username' => $this->mentioner->username,
+            'mentioner_avatar' => $this->mentioner->avatar_path,
+        ];
     }
 
     /**

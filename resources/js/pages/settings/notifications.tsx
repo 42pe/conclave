@@ -43,8 +43,8 @@ export default function Notifications() {
                 <div className="space-y-6">
                     <Heading
                         variant="small"
-                        title="Notification settings"
-                        description="Choose what email notifications you receive"
+                        title="Email notification settings"
+                        description="Choose which email notifications you receive. In-app notifications are always enabled."
                     />
 
                     <form onSubmit={handleSubmit} className="space-y-6">
