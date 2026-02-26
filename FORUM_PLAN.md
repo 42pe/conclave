@@ -337,6 +337,15 @@ body JSON NOT NULL, timestamps
 - `e2e-tests/tests/auth/registration.spec.ts` — register with username, verify profile fields
 - `e2e-tests/tests/settings/profile.spec.ts` — update profile fields (username, names, bio), verify changes persist
 
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 1.1 | `registration.spec.ts` | Registration includes username field | Verify username input is present on `/register` |
+| 1.2 | `registration.spec.ts` | Registration rejects duplicate username | Register, then try same username again — error shown |
+| 1.3 | `profile.spec.ts` | Profile settings shows extended fields | `/settings/profile` has first name, last name, preferred name, bio, username |
+| 1.4 | `profile.spec.ts` | Profile settings saves extended fields | Fill all fields, save, reload — values persist |
+
+*Already covered by existing tests:* Basic registration (valid + validation errors), profile update + persistence, invalid username.
+
 ### Key files modified
 - `app/Models/User.php` · `resources/js/types/auth.ts` · `database/factories/UserFactory.php`
 
@@ -374,6 +383,15 @@ body JSON NOT NULL, timestamps
 ### Playwright E2E Tests
 - `e2e-tests/tests/settings/avatar.spec.ts` — upload avatar, verify display in sidebar/profile
 - `e2e-tests/tests/settings/privacy.spec.ts` — toggle privacy settings, verify directory visibility
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 2.1 | `avatar.spec.ts` | Can upload avatar | Go to profile settings, upload image, verify preview appears |
+| 2.2 | `avatar.spec.ts` | Avatar appears in sidebar after upload | Upload avatar, check sidebar NavUser shows avatar image |
+| 2.3 | `avatar.spec.ts` | Can remove avatar | Upload avatar, click remove, verify fallback initials shown |
+| 2.4 | `privacy.spec.ts` | Privacy settings page loads | Navigate to `/settings/privacy`, verify toggles present |
+| 2.5 | `privacy.spec.ts` | Privacy settings persist | Toggle settings off, save, reload — settings remain off |
+| 2.6 | `privacy.spec.ts` | Notification preferences load | Verify notify_replies, notify_messages toggles exist |
 
 ---
 
@@ -416,7 +434,18 @@ body JSON NOT NULL, timestamps
 
 ### Playwright E2E Tests
 - `e2e-tests/tests/admin/topics.spec.ts` — create/edit/delete topics, verify icon & header image, visibility settings
-- `e2e-tests/tests/forum/topic-listing.spec.ts` — verify homepage shows topics, public vs private visibility for guests
+- `e2e-tests/tests/forum/topics.spec.ts` — verify homepage shows topics, public vs private visibility for guests
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 3.1 | `topics.spec.ts` | Homepage shows public topics to guest | Visit `/` without login — see public topics |
+| 3.2 | `topics.spec.ts` | Homepage hides restricted topics from guest | Visit `/` without login — "Members Only Lounge" not visible |
+| 3.3 | `topics.spec.ts` | Restricted topics visible to logged-in user | Login as testuser, visit `/` — "Members Only Lounge" visible |
+| 3.4 | `admin/topics.spec.ts` | Admin can access topic management | Login as admin, navigate to admin topics — topic list visible |
+| 3.5 | `admin/topics.spec.ts` | Admin can create a topic | Login as admin, create new topic, verify it appears |
+| 3.6 | `admin/topics.spec.ts` | Admin can edit a topic | Login as admin, edit existing topic title, verify change |
+| 3.7 | `admin/topics.spec.ts` | Non-admin cannot access admin pages | Login as testuser, navigate to `/admin/topics` — redirected |
+| 3.8 | `topics.spec.ts` | Topic card shows discussion count | Homepage topics show discussion count badges |
 
 ---
 
@@ -454,7 +483,14 @@ body JSON NOT NULL, timestamps
 
 ### Playwright E2E Tests
 - `e2e-tests/tests/editor/slate-editor.spec.ts` — type text, apply formatting (bold/italic/headings), verify toolbar interactions
-- `e2e-tests/tests/editor/media-upload.spec.ts` — upload image/video/document via editor, verify inline display
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 4.1 | `slate-editor.spec.ts` | Editor loads in discussion create | Navigate to create discussion — Slate editor visible with toolbar |
+| 4.2 | `slate-editor.spec.ts` | Can type text in editor | Click editor, type text, verify text appears |
+| 4.3 | `slate-editor.spec.ts` | Toolbar bold button works | Select text, click bold, verify bold formatting applied |
+| 4.4 | `slate-editor.spec.ts` | Toolbar heading button works | Click heading button, type text, verify heading rendered |
+| 4.5 | `slate-editor.spec.ts` | Can upload image in editor | Upload image via toolbar, verify image preview in editor |
 
 ---
 
@@ -495,7 +531,20 @@ body JSON NOT NULL, timestamps
 
 ### Playwright E2E Tests
 - `e2e-tests/tests/forum/discussions.spec.ts` — create discussion with Slate editor, navigate topic→discussion, edit/delete, location filter
-- `e2e-tests/tests/forum/topic-visibility.spec.ts` — guest sees public topics only, logged-in user sees private, admin sees restricted
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 5.1 | `discussions.spec.ts` | Topic page lists discussions | Navigate to General Discussion topic — see discussion cards |
+| 5.2 | `discussions.spec.ts` | Pinned discussions appear first | Pinned discussions (with pin icon) appear before unpinned |
+| 5.3 | `discussions.spec.ts` | Can create discussion | Login, navigate to topic, click create, fill title + body, submit — redirected to new discussion |
+| 5.4 | `discussions.spec.ts` | Discussion detail page renders | Click discussion card — see title, author, body content, reply section |
+| 5.5 | `discussions.spec.ts` | Rich text renders correctly | Discussion body shows formatted text (bold, lists, headings) |
+| 5.6 | `discussions.spec.ts` | Can edit own discussion | Edit a discussion owned by testuser — title/body update |
+| 5.7 | `discussions.spec.ts` | Cannot edit another user's discussion | Cannot see edit button on admin's discussion |
+| 5.8 | `discussions.spec.ts` | Can delete own discussion | Delete own discussion — removed from topic listing |
+| 5.9 | `discussions.spec.ts` | Guest can view discussions | Without login, navigate to topic and view a discussion |
+| 5.10 | `discussions.spec.ts` | Guest cannot create discussion | Without login, no create discussion button visible |
+| 5.11 | `discussions.spec.ts` | Discussion card shows metadata | Cards show author name, time ago, reply count |
 
 ---
 
@@ -531,8 +580,17 @@ body JSON NOT NULL, timestamps
 - `tests/Unit/Observers/ReplyObserverTest.php`
 
 ### Playwright E2E Tests
-- `e2e-tests/tests/forum/replies.spec.ts` — post reply, reply to reply (nested), verify 3-level cap, edit/delete reply
-- `e2e-tests/tests/forum/locked-discussion.spec.ts` — verify reply form hidden on locked discussions
+- `e2e-tests/tests/forum/replies.spec.ts` — post reply, reply to reply (nested), edit/delete reply, locked discussion
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 6.1 | `replies.spec.ts` | Can post reply to discussion | Navigate to discussion, write reply, submit — reply appears |
+| 6.2 | `replies.spec.ts` | Can reply to a reply (nested) | Post reply, click Reply on it, submit — nested reply appears indented |
+| 6.3 | `replies.spec.ts` | Reply count updates | Post reply — discussion reply count increments |
+| 6.4 | `replies.spec.ts` | Can edit own reply | Edit reply text, save — updated text shown |
+| 6.5 | `replies.spec.ts` | Can delete own reply | Delete reply — reply removed |
+| 6.6 | `replies.spec.ts` | Guest cannot reply | Without login, reply form/button not available |
+| 6.7 | `replies.spec.ts` | Locked discussion hides reply form | Admin locks discussion — reply form hidden for regular users |
 
 ---
 
@@ -565,6 +623,17 @@ body JSON NOT NULL, timestamps
 ### Playwright E2E Tests
 - `e2e-tests/tests/users/profile.spec.ts` — view user profile, verify privacy prefs honored, check paginated discussions
 - `e2e-tests/tests/users/directory.spec.ts` — browse directory, search users, verify deleted users excluded
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 7.1 | `users/profile.spec.ts` | User profile page loads | Navigate to `/users/testuser` — profile visible with name, username, bio |
+| 7.2 | `users/profile.spec.ts` | Profile shows discussions tab | Profile has discussions tab listing user's discussions |
+| 7.3 | `users/profile.spec.ts` | Profile shows replies tab | Profile has replies tab listing user's replies |
+| 7.4 | `users/profile.spec.ts` | Deleted user shows "Deleted User" | Navigate to `/users/deleted-user` — shows "Deleted User" |
+| 7.5 | `users/directory.spec.ts` | Directory page lists users | Navigate to `/directory` — see user list |
+| 7.6 | `users/directory.spec.ts` | Directory search filters users | Type in search box — list filters to matching users |
+| 7.7 | `users/directory.spec.ts` | Directory excludes deleted users | Deleted users not visible in directory |
+| 7.8 | `users/directory.spec.ts` | Privacy: hidden user not in directory | User with `show_in_directory=false` not shown |
 
 ---
 
@@ -603,9 +672,18 @@ body JSON NOT NULL, timestamps
 - `tests/Feature/SuspendedUserTest.php`
 
 ### Playwright E2E Tests
-- `e2e-tests/tests/admin/user-moderation.spec.ts` — ban/suspend/delete user flows, verify "Deleted User" display on content
-- `e2e-tests/tests/auth/banned-registration.spec.ts` — attempt registration with banned email, verify rejection
-- `e2e-tests/tests/forum/suspended-user.spec.ts` — suspended user can browse but cannot post/reply
+- `e2e-tests/tests/admin/users.spec.ts` — ban/suspend/delete user flows, verify moderation effects
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 8.1 | `admin/users.spec.ts` | Admin can see user management page | Login as admin, navigate to admin users — user table visible |
+| 8.2 | `admin/users.spec.ts` | Admin can suspend a user | Suspend a user, verify badge shows "Suspended" |
+| 8.3 | `admin/users.spec.ts` | Admin can unsuspend a user | Unsuspend previously suspended user |
+| 8.4 | `admin/users.spec.ts` | Suspended user cannot create discussion | Login as suspended user — create button disabled/hidden |
+| 8.5 | `admin/users.spec.ts` | Suspended user cannot reply | Login as suspended user — reply form not available |
+| 8.6 | `admin/users.spec.ts` | Admin can ban a user | Ban user, verify badge shows "Banned" |
+| 8.7 | `admin/users.spec.ts` | Banned email cannot register | Try to register with banned email — error shown |
+| 8.8 | `admin/users.spec.ts` | Admin can delete a user (anonymize) | Delete user, verify content shows "Deleted User" |
 
 ---
 
@@ -644,8 +722,16 @@ body JSON NOT NULL, timestamps
 - `tests/Feature/MessageTest.php`
 
 ### Playwright E2E Tests
-- `e2e-tests/tests/messages/conversations.spec.ts` — start conversation, send messages, verify unread badge, read conversation
-- `e2e-tests/tests/messages/compose.spec.ts` — compose message with Slate editor formatting
+- `e2e-tests/tests/messages/conversations.spec.ts` — start conversation, send messages, verify unread badge
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 9.1 | `conversations.spec.ts` | Messages page loads | Login, navigate to `/messages` — conversation list visible |
+| 9.2 | `conversations.spec.ts` | Can start new conversation | Click new conversation, select user, write message, send — created |
+| 9.3 | `conversations.spec.ts` | Can reply in conversation | Open existing conversation, write reply, submit — message appears |
+| 9.4 | `conversations.spec.ts` | Unread badge shows in sidebar | Second user sends message → first user sees unread badge on Messages nav |
+| 9.5 | `conversations.spec.ts` | Conversation list shows latest message preview | Conversation list shows snippet of most recent message |
+| 9.6 | `conversations.spec.ts` | Guest cannot access messages | Without login, `/messages` redirects to login |
 
 ---
 
@@ -688,7 +774,14 @@ body JSON NOT NULL, timestamps
 - `tests/Feature/Settings/NotificationPreferencesTest.php`
 
 ### Playwright E2E Tests
-- `e2e-tests/tests/settings/notifications.spec.ts` — toggle notification preferences, verify persistence
+- `e2e-tests/tests/notifications/notifications.spec.ts` — notification preferences portion
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 10.1 | `notifications.spec.ts` | Notification preferences toggles work | Toggle notify_replies off, save, reload — toggle stays off |
+| 10.2 | `notifications.spec.ts` | Notification preferences page accessible | Navigate to notification settings — all toggles visible |
+
+*Note: Email delivery cannot be E2E tested via Playwright. Backend Pest tests cover email notification logic.*
 
 ---
 
@@ -721,6 +814,19 @@ body JSON NOT NULL, timestamps
 
 ### Pest Tests
 - Update `tests/Feature/DashboardTest.php` — assert Inertia props (userStats, recentReplies, activeTopics, recentDiscussions)
+
+### Playwright E2E Tests
+- `e2e-tests/tests/admin/topics.spec.ts` (extend) — icon picker in admin topic form
+- `e2e-tests/tests/dashboard/dashboard.spec.ts` — dashboard loads with stats and deferred sections
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 11.1 | `admin/topics.spec.ts` | Admin topic form has icon picker | Create/edit topic — icon picker button visible, opens dialog with grid |
+| 11.2 | `admin/topics.spec.ts` | Icon picker search filters icons | Type in icon search — filtered icon grid updates |
+| 11.3 | `admin/topics.spec.ts` | Selected icon renders on topic card | Select icon for topic, verify it appears on homepage topic card |
+| 11.4 | `dashboard.spec.ts` | Dashboard loads with stats | Login, visit `/dashboard` — user stats cards visible |
+| 11.5 | `dashboard.spec.ts` | Dashboard shows recent discussions | Dashboard has recent discussions section with discussion links |
+| 11.6 | `dashboard.spec.ts` | Dashboard skeleton states appear | Deferred sections show skeleton loading before data loads |
 
 ---
 
@@ -766,6 +872,16 @@ body JSON NOT NULL, timestamps
 - Update `tests/Feature/Rules/SlateDocumentTest.php` — valid/invalid mention nodes
 - Update `tests/Feature/Settings/NotificationPreferencesTest.php` — include notify_mentions
 
+### Playwright E2E Tests
+- `e2e-tests/tests/editor/slate-editor.spec.ts` (extend) — @mention autocomplete and rendering
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 12.1 | `slate-editor.spec.ts` | @mention autocomplete appears | In editor, type `@te` — autocomplete dropdown shows matching users |
+| 12.2 | `slate-editor.spec.ts` | Selecting mention inserts chip | Click user in autocomplete — mention chip inserted in editor |
+| 12.3 | `slate-editor.spec.ts` | Mention renders as link in content | Submit discussion with mention — renders as clickable user link |
+| 12.4 | `slate-editor.spec.ts` | Mention link navigates to profile | Click mention link in discussion body — navigates to user profile |
+
 ---
 
 ## Phase 13: In-App Notifications Panel
@@ -798,6 +914,20 @@ body JSON NOT NULL, timestamps
 - Update `tests/Feature/NotificationTest.php` — fix assertNotSentTo → assertSentTo with channel check (via() always returns ['database'] now)
 - Update `tests/Feature/MessageTest.php` — unread notifications count shared
 
+### Playwright E2E Tests
+- `e2e-tests/tests/notifications/notifications.spec.ts` — notification panel interactions and lifecycle
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 13.1 | `notifications.spec.ts` | Bell icon visible in sidebar | Login — bell icon with notification count visible in sidebar |
+| 13.2 | `notifications.spec.ts` | Notification panel opens on click | Click bell icon — sheet panel slides open showing notifications |
+| 13.3 | `notifications.spec.ts` | Reply notification appears | User A replies to User B's discussion — User B sees notification |
+| 13.4 | `notifications.spec.ts` | Mention notification appears | User A mentions User B — User B sees mention notification |
+| 13.5 | `notifications.spec.ts` | Mark single notification as read | Click a notification — it becomes read (visual change) |
+| 13.6 | `notifications.spec.ts` | Mark all notifications as read | Click "Mark all as read" — all cleared, badge updates |
+| 13.7 | `notifications.spec.ts` | Notification click navigates to content | Click reply notification — navigates to the discussion |
+| 13.8 | `notifications.spec.ts` | Unread count badge updates | After marking all read, badge disappears from sidebar |
+
 ### Development Data Seeders
 - `database/seeders/Development/NotificationSeeder.php` — seed sample notifications for dev users
 
@@ -828,6 +958,21 @@ body JSON NOT NULL, timestamps
 
 ### Pest Tests
 - `tests/Feature/LikeTest.php` — Like/unlike discussion, like/unlike reply, count correctness, toggle behavior (no duplicates), auth required, suspended cannot like, show page includes like data
+
+### Playwright E2E Tests
+- `e2e-tests/tests/forum/likes.spec.ts` — like/unlike discussions and replies, counts, persistence
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 14.1 | `likes.spec.ts` | Like button visible on discussion | Navigate to discussion — heart icon with count visible |
+| 14.2 | `likes.spec.ts` | Can like a discussion | Click heart — fills red, count increments |
+| 14.3 | `likes.spec.ts` | Can unlike a discussion | Click liked heart — unfills, count decrements |
+| 14.4 | `likes.spec.ts` | Like persists after page reload | Like discussion, reload — heart still filled, count correct |
+| 14.5 | `likes.spec.ts` | Like button visible on reply | Reply shows heart icon with count |
+| 14.6 | `likes.spec.ts` | Can like a reply | Click reply heart — fills, count increments |
+| 14.7 | `likes.spec.ts` | Guest sees like counts but no button | Without login, counts visible, no clickable heart |
+| 14.8 | `likes.spec.ts` | Like count visible on topic listing card | Discussion card on topic page shows heart icon + count |
+| 14.9 | `likes.spec.ts` | Like toggle on topic listing card | Click heart on discussion card — toggles without navigating |
 
 ### Development Data Seeders
 - `database/seeders/Development/LikeSeeder.php` — Scatter likes across discussions and replies from various users
@@ -862,6 +1007,21 @@ body JSON NOT NULL, timestamps
 - `tests/Feature/BookmarkTest.php` — Bookmark/unbookmark, toggle behavior, auth required, index page, only own bookmarks, show page includes bookmark data
 - `tests/Feature/BookmarkNotificationTest.php` — Notification sent on reply to bookmarked discussion, no self-notification, no duplicate with NewReplyNotification, database-only channel, correct data
 
+### Playwright E2E Tests
+- `e2e-tests/tests/forum/bookmarks.spec.ts` — bookmark toggle, bookmarks page, bookmark notifications
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 15.1 | `bookmarks.spec.ts` | Bookmark button visible on discussion | Navigate to discussion — bookmark icon visible |
+| 15.2 | `bookmarks.spec.ts` | Can bookmark a discussion | Click bookmark — icon fills |
+| 15.3 | `bookmarks.spec.ts` | Can remove bookmark | Click bookmarked icon — unfills |
+| 15.4 | `bookmarks.spec.ts` | Bookmark persists after reload | Bookmark, reload — bookmark still active |
+| 15.5 | `bookmarks.spec.ts` | Bookmarks page shows bookmarked discussions | Navigate to `/bookmarks` — see bookmarked discussions |
+| 15.6 | `bookmarks.spec.ts` | Bookmarks page empty state | Remove all bookmarks, visit `/bookmarks` — empty state message |
+| 15.7 | `bookmarks.spec.ts` | Bookmark toggle on topic listing card | Click bookmark on discussion card — toggles without navigating |
+| 15.8 | `bookmarks.spec.ts` | Bookmark notification on new reply | User A bookmarks, User B replies — User A sees notification |
+| 15.9 | `bookmarks.spec.ts` | Bookmarks sidebar nav item works | Click "Bookmarks" in sidebar — navigates to bookmarks page |
+
 ### Development Data Seeders
 - `database/seeders/Development/BookmarkSeeder.php` — Bookmark some discussions for dev users
 
@@ -882,6 +1042,9 @@ body JSON NOT NULL, timestamps
 - Update `tests/Feature/LikeTest.php` — Topic index includes like data
 - Update `tests/Feature/BookmarkTest.php` — Topic index includes bookmark data
 
+### Playwright E2E Tests
+*Tests covered in Phase 14 and 15 tables above (tests 14.8, 14.9, 15.7 specifically test topic listing interactions).*
+
 ---
 
 ## Phase 16: Discussion View Tracking
@@ -900,6 +1063,15 @@ body JSON NOT NULL, timestamps
 
 ### Pest Tests
 - `tests/Feature/DiscussionViewTest.php` — View count increments on show, view count visible in topic listing, view count visible in discussion show
+
+### Playwright E2E Tests
+- `e2e-tests/tests/forum/views.spec.ts` — view count display and incrementing
+
+| # | File | Test | Description |
+|---|------|------|-------------|
+| 16.1 | `views.spec.ts` | View count displays on discussion card | Topic listing cards show eye icon + view count |
+| 16.2 | `views.spec.ts` | View count displays on discussion detail | Discussion detail page shows view count |
+| 16.3 | `views.spec.ts` | View count increments on visit | Note count, visit discussion, go back — count incremented by 1 |
 
 ---
 
