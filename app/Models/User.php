@@ -152,6 +152,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the bookmarks created by the user.
+     */
+    public function bookmarks(): HasMany
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
+    /**
      * Get the banned email records associated with this user.
      */
     public function bannedEmails(): HasMany

@@ -141,6 +141,14 @@ class Discussion extends Model
     }
 
     /**
+     * Get the bookmarks for this discussion.
+     */
+    public function bookmarks(): HasMany
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
+    /**
      * Scope a query to only include pinned discussions.
      */
     public function scopePinned(Builder $query): Builder

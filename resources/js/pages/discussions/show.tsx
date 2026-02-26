@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Heart, Lock, MapPin, MessageSquare, Pencil, Pin, Trash2 } from 'lucide-react';
+import { Bookmark, Heart, Lock, MapPin, MessageSquare, Pencil, Pin, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import {
     AlertDialog,
@@ -54,6 +54,7 @@ type Discussion = {
     reply_count: number;
     likes_count: number;
     user_has_liked: boolean;
+    user_has_bookmarked: boolean;
     created_at: string;
     updated_at: string;
     user: User | null;
@@ -93,6 +94,7 @@ export default function DiscussionShow({ topic, discussion, replies, can }: Prop
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [liked, setLiked] = useState(discussion.user_has_liked);
     const [likeCount, setLikeCount] = useState(discussion.likes_count);
+    const [bookmarked, setBookmarked] = useState(discussion.user_has_bookmarked);
     const { auth } = usePage().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -137,6 +139,27 @@ export default function DiscussionShow({ topic, discussion, replies, can }: Prop
             .catch(() => {
                 setLiked(discussion.user_has_liked);
                 setLikeCount(discussion.likes_count);
+            });
+    };
+
+    const handleBookmark = () => {
+        setBookmarked(!bookmarked);
+        fetch(`/discussions/${discussion.id}/bookmark`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN':
+                    document.querySelector<HTMLMetaElement>(
+                        'meta[name="csrf-token"]',
+                    )?.content ?? '',
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setBookmarked(data.bookmarked);
+            })
+            .catch(() => {
+                setBookmarked(discussion.user_has_bookmarked);
             });
     };
 
@@ -240,21 +263,38 @@ export default function DiscussionShow({ topic, discussion, replies, can }: Prop
                         <SlateRenderer value={discussion.body} />
                         <div className="mt-4 flex items-center gap-4 border-t pt-3">
                             {auth.user ? (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 gap-1.5 px-2 text-xs"
-                                    onClick={handleLike}
-                                >
-                                    <Heart
-                                        className={cn(
-                                            'size-3.5',
-                                            liked &&
-                                                'fill-current text-red-500',
-                                        )}
-                                    />
-                                    {likeCount}
-                                </Button>
+                                <>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 gap-1.5 px-2 text-xs"
+                                        onClick={handleLike}
+                                    >
+                                        <Heart
+                                            className={cn(
+                                                'size-3.5',
+                                                liked &&
+                                                    'fill-current text-red-500',
+                                            )}
+                                        />
+                                        {likeCount}
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 gap-1.5 px-2 text-xs"
+                                        onClick={handleBookmark}
+                                    >
+                                        <Bookmark
+                                            className={cn(
+                                                'size-3.5',
+                                                bookmarked &&
+                                                    'fill-current text-amber-500',
+                                            )}
+                                        />
+                                        {bookmarked ? 'Bookmarked' : 'Bookmark'}
+                                    </Button>
+                                </>
                             ) : (
                                 discussion.likes_count > 0 && (
                                     <span className="flex items-center gap-1.5 text-xs text-muted-foreground">

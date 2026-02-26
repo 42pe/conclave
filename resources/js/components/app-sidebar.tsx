@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Mail, MessageCircle, MessageSquare, Shield, Users } from 'lucide-react';
+import { Bookmark, BookOpen, Folder, LayoutGrid, Mail, MessageCircle, MessageSquare, Shield, Users } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -40,6 +40,11 @@ const mainNavItems: NavItem[] = [
         title: 'Directory',
         href: directoryIndex().url,
         icon: Users,
+    },
+    {
+        title: 'Bookmarks',
+        href: '/bookmarks',
+        icon: Bookmark,
     },
 ];
 

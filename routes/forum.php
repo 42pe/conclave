@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\DiscussionController;
 use App\Http\Controllers\LikeController;
@@ -55,6 +56,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/discussions/{discussion}/like', [LikeController::class, 'toggleDiscussionLike'])
         ->middleware('not-suspended')
         ->name('discussions.like');
+
+    Route::post('/discussions/{discussion}/bookmark', [BookmarkController::class, 'toggle'])
+        ->name('discussions.bookmark');
 
     Route::post('/replies/{reply}/like', [LikeController::class, 'toggleReplyLike'])
         ->middleware('not-suspended')

@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { AtSign, Bell, CheckCheck, MessageCircle, MessageSquare } from 'lucide-react';
+import { AtSign, Bell, Bookmark, CheckCheck, MessageCircle, MessageSquare } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +13,7 @@ import {
 import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 
 type NotificationData = {
-    type: 'new_reply' | 'new_message' | 'mention';
+    type: 'new_reply' | 'new_message' | 'mention' | 'bookmark_activity';
     discussion_id?: number;
     discussion_title?: string;
     discussion_slug?: string;
@@ -64,6 +64,8 @@ function getNotificationIcon(type: string) {
             return <MessageSquare className="size-4 shrink-0" />;
         case 'mention':
             return <AtSign className="size-4 shrink-0" />;
+        case 'bookmark_activity':
+            return <Bookmark className="size-4 shrink-0" />;
         default:
             return <Bell className="size-4 shrink-0" />;
     }
@@ -77,6 +79,8 @@ function getNotificationText(data: NotificationData): string {
             return `${data.sender_name ?? 'Someone'} sent you a message`;
         case 'mention':
             return `${data.mentioner_name ?? 'Someone'} mentioned you in "${data.discussion_title}"`;
+        case 'bookmark_activity':
+            return `New activity in "${data.discussion_title}"`;
         default:
             return 'New notification';
     }
@@ -86,6 +90,7 @@ function getNotificationUrl(data: NotificationData): string {
     switch (data.type) {
         case 'new_reply':
         case 'mention':
+        case 'bookmark_activity':
             if (data.topic_slug && data.discussion_slug) {
                 return `/topics/${data.topic_slug}/discussions/${data.discussion_slug}`;
             }

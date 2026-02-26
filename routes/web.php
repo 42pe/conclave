@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\TopicVisibility;
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MediaController;
@@ -40,6 +41,9 @@ Route::post('media/upload', [MediaController::class, 'store'])
     ->name('media.upload');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('bookmarks', [BookmarkController::class, 'index'])
+        ->name('bookmarks.index');
+
     Route::get('notifications', [NotificationPanelController::class, 'index'])
         ->name('notifications.index');
     Route::post('notifications/mark-all-read', [NotificationPanelController::class, 'markAllAsRead'])

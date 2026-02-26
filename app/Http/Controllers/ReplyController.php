@@ -8,6 +8,7 @@ use App\Models\Discussion;
 use App\Models\Reply;
 use App\Models\User;
 use App\Notifications\NewReplyNotification;
+use App\Services\BookmarkNotificationService;
 use App\Services\MentionService;
 use App\Services\PostHogService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -20,6 +21,7 @@ class ReplyController extends Controller
     public function __construct(
         private PostHogService $postHog,
         private MentionService $mentions,
+        private BookmarkNotificationService $bookmarkNotifications,
     ) {}
 
     /**
@@ -48,7 +50,9 @@ class ReplyController extends Controller
             'discussion_id' => $discussion->id,
         ]);
 
-        $this->sendReplyNotifications($reply, $discussion, $request->user());
+        $notifiedUserIds = $this->sendReplyNotifications($reply, $discussion, $request->user());
+
+        $this->bookmarkNotifications->notifyBookmarkingUsers($reply, $discussion, $request->user(), $notifiedUserIds);
 
         $this->mentions->notifyMentionedUsers(
             $request->validated('body'),
@@ -88,8 +92,10 @@ class ReplyController extends Controller
 
     /**
      * Send notifications to discussion author and parent reply author.
+     *
+     * @return array<int, int>
      */
-    private function sendReplyNotifications(Reply $reply, Discussion $discussion, User $actor): void
+    private function sendReplyNotifications(Reply $reply, Discussion $discussion, User $actor): array
     {
         $notified = [];
 
@@ -105,7 +111,10 @@ class ReplyController extends Controller
             $parentAuthor = $reply->parent?->user;
             if ($parentAuthor && $parentAuthor->id !== $actor->id && ! in_array($parentAuthor->id, $notified)) {
                 $parentAuthor->notify(new NewReplyNotification($reply, $discussion));
+                $notified[] = $parentAuthor->id;
             }
         }
+
+        return $notified;
     }
 }

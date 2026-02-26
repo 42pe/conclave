@@ -71,6 +71,11 @@ class DiscussionController extends Controller
             $user ? $discussion->likes()->where('user_id', $user->id)->exists() : false,
         );
 
+        $discussion->setAttribute(
+            'user_has_bookmarked',
+            $user ? $discussion->bookmarks()->where('user_id', $user->id)->exists() : false,
+        );
+
         $replies = $discussion->replies()
             ->whereNull('parent_id')
             ->withCount('likes')
