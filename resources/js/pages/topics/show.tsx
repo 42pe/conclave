@@ -34,6 +34,10 @@ type Discussion = {
     is_pinned: boolean;
     is_locked: boolean;
     reply_count: number;
+    view_count: number;
+    likes_count: number;
+    user_has_liked: boolean;
+    user_has_bookmarked: boolean;
     last_reply_at: string | null;
     created_at: string;
     user: User | null;
@@ -67,6 +71,7 @@ type Props = {
     can: {
         create: boolean;
     };
+    authUserId: number | null;
 };
 
 export default function TopicShow({
@@ -74,6 +79,7 @@ export default function TopicShow({
     discussions,
     locations,
     can,
+    authUserId,
 }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Forum', href: '/' },
@@ -150,6 +156,7 @@ export default function TopicShow({
                                 key={discussion.id}
                                 discussion={discussion}
                                 topicSlug={topic.slug}
+                                authUserId={authUserId}
                             />
                         ))
                     )}

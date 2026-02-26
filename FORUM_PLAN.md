@@ -9,7 +9,7 @@
 
 Hierarchy: **Topics > Discussions > Replies**
 
-15 phases, each independently deployable with its own migrations, models, controllers, pages, factories, seeders, Pest tests, and Playwright E2E tests.
+16 phases, each independently deployable with its own migrations, models, controllers, pages, factories, seeders, Pest tests, and Playwright E2E tests.
 
 ---
 
@@ -867,6 +867,42 @@ body JSON NOT NULL, timestamps
 
 ---
 
+## Phase 14b/15b: Like & Bookmark from Topic View
+
+**Goal:** Extend the discussion card in the topic listing to show like counts, bookmark status, and allow toggling likes/bookmarks directly from the topic view without navigating to the discussion.
+
+### Backend
+- Update `app/Http/Controllers/DiscussionController.php` — In `index()`: eager-load `withCount('likes')`, and for auth users: compute `user_has_liked` and `user_has_bookmarked` per discussion
+
+### Frontend
+- Update `resources/js/components/discussion-card.tsx` — Restructure from single `<Link>` to `<div>` with clickable title. Add like button (Heart + count) and bookmark button. Use optimistic toggle with fetch POST. Show counts to all users; buttons only for authenticated.
+- Update `resources/js/pages/topics/show.tsx` — Pass `authUserId` to DiscussionCard. Update Discussion type with `likes_count`, `user_has_liked`, `user_has_bookmarked`.
+
+### Pest Tests
+- Update `tests/Feature/LikeTest.php` — Topic index includes like data
+- Update `tests/Feature/BookmarkTest.php` — Topic index includes bookmark data
+
+---
+
+## Phase 16: Discussion View Tracking
+
+**Goal:** Track and display view counts for discussions. Show views, replies, and likes as stats on both topic listing and discussion detail pages.
+
+### Backend
+- Migration: `add_view_count_to_discussions_table` — `view_count UNSIGNED INTEGER DEFAULT 0`
+- Update `app/Http/Controllers/DiscussionController.php`:
+  - In `show()`: increment `view_count` (use `$discussion->increment('view_count')` — atomic, no race condition)
+  - In `index()`: `view_count` already available via model (no extra query needed)
+
+### Frontend
+- Update `resources/js/components/discussion-card.tsx` — Show view count (Eye icon) alongside reply count and like count
+- Update `resources/js/pages/discussions/show.tsx` — Show view count in discussion stats area alongside likes
+
+### Pest Tests
+- `tests/Feature/DiscussionViewTest.php` — View count increments on show, view count visible in topic listing, view count visible in discussion show
+
+---
+
 ## Verification Strategy
 
 After each phase, the following checks must pass before the **Senior Engineer** signs off:
@@ -912,3 +948,5 @@ After each phase, the following checks must pass before the **Senior Engineer** 
 | `resources/js/components/reply-thread.tsx` | 14 (like props passthrough) |
 | `app/Http/Controllers/ReplyController.php` | 15 (bookmark notifications) |
 | `resources/js/components/notification-panel.tsx` | 15 (bookmark_activity type) |
+| `resources/js/components/discussion-card.tsx` | 14b/15b (like/bookmark in topic view), 16 (view count) |
+| `resources/js/pages/topics/show.tsx` | 14b/15b (like/bookmark props) |

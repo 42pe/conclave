@@ -30,6 +30,7 @@ class Discussion extends Model
         'is_pinned',
         'is_locked',
         'reply_count',
+        'view_count',
         'last_reply_at',
     ];
 

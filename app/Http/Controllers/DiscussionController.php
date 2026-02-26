@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDiscussionRequest;
 use App\Http\Requests\UpdateDiscussionRequest;
+use App\Models\Bookmark;
 use App\Models\Discussion;
 use App\Models\Location;
 use App\Models\Reply;
@@ -33,21 +34,51 @@ class DiscussionController extends Controller
 
         $discussions = $topic->discussions()
             ->with(['user:id,name,username,avatar_path,preferred_name,is_deleted', 'location:id,name'])
+            ->withCount('likes')
             ->when(request('location'), fn ($q, $locationId) => $q->byLocation((int) $locationId))
             ->orderByDesc('is_pinned')
             ->orderByDesc('last_reply_at')
             ->orderByDesc('created_at')
             ->paginate(20);
 
+        $user = request()->user();
+
+        if ($user) {
+            $discussionIds = $discussions->getCollection()->pluck('id')->all();
+
+            $likedIds = $user->likes()
+                ->where('likeable_type', Discussion::class)
+                ->whereIn('likeable_id', $discussionIds)
+                ->pluck('likeable_id')
+                ->all();
+
+            $bookmarkedIds = Bookmark::query()
+                ->where('user_id', $user->id)
+                ->whereIn('discussion_id', $discussionIds)
+                ->pluck('discussion_id')
+                ->all();
+
+            $discussions->getCollection()->each(function ($discussion) use ($likedIds, $bookmarkedIds) {
+                $discussion->setAttribute('user_has_liked', in_array($discussion->id, $likedIds));
+                $discussion->setAttribute('user_has_bookmarked', in_array($discussion->id, $bookmarkedIds));
+            });
+        } else {
+            $discussions->getCollection()->each(function ($discussion) {
+                $discussion->setAttribute('user_has_liked', false);
+                $discussion->setAttribute('user_has_bookmarked', false);
+            });
+        }
+
         return Inertia::render('topics/show', [
             'topic' => $topic,
             'discussions' => $discussions,
             'locations' => Location::query()->active()->orderBy('sort_order')->get(['id', 'name']),
             'can' => [
-                'create' => request()->user()
-                    ? request()->user()->can('create', [Discussion::class, $topic])
+                'create' => $user
+                    ? $user->can('create', [Discussion::class, $topic])
                     : false,
             ],
+            'authUserId' => $user?->id,
         ]);
     }
 
@@ -57,6 +88,8 @@ class DiscussionController extends Controller
     public function show(Topic $topic, Discussion $discussion): Response
     {
         $this->authorize('view', $discussion);
+
+        $discussion->increment('view_count');
 
         $discussion->load([
             'user:id,name,username,avatar_path,preferred_name,is_deleted,bio,role',

@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Bookmark, Heart, Lock, MapPin, MessageSquare, Pencil, Pin, Trash2 } from 'lucide-react';
+import { Bookmark, Eye, Heart, Lock, MapPin, MessageSquare, Pencil, Pin, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import {
     AlertDialog,
@@ -52,6 +52,7 @@ type Discussion = {
     is_pinned: boolean;
     is_locked: boolean;
     reply_count: number;
+    view_count: number;
     likes_count: number;
     user_has_liked: boolean;
     user_has_bookmarked: boolean;
@@ -262,6 +263,10 @@ export default function DiscussionShow({ topic, discussion, replies, can }: Prop
                     <div className="rounded-lg border p-6">
                         <SlateRenderer value={discussion.body} />
                         <div className="mt-4 flex items-center gap-4 border-t pt-3">
+                            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Eye className="size-3.5" />
+                                {discussion.view_count} views
+                            </span>
                             {auth.user ? (
                                 <>
                                     <Button

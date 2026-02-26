@@ -90,6 +90,33 @@ test('bookmarks index only shows own bookmarks', function () {
     );
 });
 
+test('topic listing includes bookmark data for discussions', function () {
+    $user = User::factory()->create();
+    $topic = Topic::factory()->public()->create();
+    $discussion = Discussion::factory()->create(['topic_id' => $topic->id]);
+    Bookmark::create(['user_id' => $user->id, 'discussion_id' => $discussion->id]);
+
+    $response = $this->actingAs($user)->get(route('topics.show', $topic));
+
+    $response->assertInertia(fn ($page) => $page
+        ->component('topics/show')
+        ->where('discussions.data.0.user_has_bookmarked', true)
+    );
+});
+
+test('topic listing shows false for user_has_bookmarked when not bookmarked', function () {
+    $user = User::factory()->create();
+    $topic = Topic::factory()->public()->create();
+    Discussion::factory()->create(['topic_id' => $topic->id]);
+
+    $response = $this->actingAs($user)->get(route('topics.show', $topic));
+
+    $response->assertInertia(fn ($page) => $page
+        ->component('topics/show')
+        ->where('discussions.data.0.user_has_bookmarked', false)
+    );
+});
+
 test('discussion show page includes user_has_bookmarked', function () {
     $this->mock(PostHogService::class)->shouldReceive('capture');
     $user = User::factory()->create();

@@ -1,7 +1,8 @@
-import { Link } from '@inertiajs/react';
-import { MapPin, MessageSquare, Pin } from 'lucide-react';
+import { router } from '@inertiajs/react';
+import { Bookmark, Eye, Heart, MapPin, MessageSquare, Pin } from 'lucide-react';
+import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 type Discussion = {
     id: number;
@@ -10,6 +11,10 @@ type Discussion = {
     is_pinned: boolean;
     is_locked: boolean;
     reply_count: number;
+    view_count: number;
+    likes_count: number;
+    user_has_liked: boolean;
+    user_has_bookmarked: boolean;
     last_reply_at: string | null;
     created_at: string;
     user: {
@@ -42,9 +47,7 @@ function formatTimeAgo(dateString: string): string {
     return date.toLocaleDateString();
 }
 
-function getUserDisplayName(
-    user: Discussion['user'],
-): string {
+function getUserDisplayName(user: Discussion['user']): string {
     if (!user || user.is_deleted) return 'Deleted User';
     return user.preferred_name ?? user.name;
 }
@@ -62,18 +65,82 @@ function getUserInitials(user: Discussion['user']): string {
 export function DiscussionCard({
     discussion,
     topicSlug,
+    authUserId,
 }: {
     discussion: Discussion;
     topicSlug: string;
+    authUserId: number | null;
 }) {
+    const [liked, setLiked] = useState(discussion.user_has_liked);
+    const [likeCount, setLikeCount] = useState(discussion.likes_count);
+    const [bookmarked, setBookmarked] = useState(discussion.user_has_bookmarked);
+
     const displayName = getUserDisplayName(discussion.user);
     const initials = getUserInitials(discussion.user);
     const activityTime = discussion.last_reply_at ?? discussion.created_at;
 
+    function handleCardClick() {
+        router.visit(`/topics/${topicSlug}/discussions/${discussion.slug}`);
+    }
+
+    function handleLike(e: React.MouseEvent) {
+        e.stopPropagation();
+        if (!authUserId) return;
+
+        setLiked(!liked);
+        setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+
+        fetch(`/discussions/${discussion.id}/like`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN':
+                    document.querySelector<HTMLMetaElement>(
+                        'meta[name="csrf-token"]',
+                    )?.content ?? '',
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setLiked(data.liked);
+                setLikeCount(data.likes_count);
+            })
+            .catch(() => {
+                setLiked(discussion.user_has_liked);
+                setLikeCount(discussion.likes_count);
+            });
+    }
+
+    function handleBookmark(e: React.MouseEvent) {
+        e.stopPropagation();
+        if (!authUserId) return;
+
+        setBookmarked(!bookmarked);
+
+        fetch(`/discussions/${discussion.id}/bookmark`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN':
+                    document.querySelector<HTMLMetaElement>(
+                        'meta[name="csrf-token"]',
+                    )?.content ?? '',
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setBookmarked(data.bookmarked);
+            })
+            .catch(() => {
+                setBookmarked(discussion.user_has_bookmarked);
+            });
+    }
+
     return (
-        <Link
-            href={`/topics/${topicSlug}/discussions/${discussion.slug}`}
-            className="flex items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-accent/50"
+        <div
+            onClick={handleCardClick}
+            className="flex cursor-pointer items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-accent/50"
+            role="link"
         >
             <Avatar className="size-10 shrink-0">
                 {discussion.user?.avatar_path && (
@@ -104,10 +171,50 @@ export function DiscussionCard({
                 </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-1.5 text-sm text-muted-foreground">
-                <MessageSquare className="size-4" />
-                <span>{discussion.reply_count}</span>
+            <div className="flex shrink-0 items-center gap-3 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                    <MessageSquare className="size-4" />
+                    <span>{discussion.reply_count}</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                    <Eye className="size-4" />
+                    <span>{discussion.view_count}</span>
+                </span>
+                {authUserId ? (
+                    <button
+                        type="button"
+                        onClick={handleLike}
+                        className="flex items-center gap-1.5 transition-colors hover:text-red-500"
+                    >
+                        <Heart
+                            className={cn(
+                                'size-4',
+                                liked && 'fill-current text-red-500',
+                            )}
+                        />
+                        <span>{likeCount}</span>
+                    </button>
+                ) : (
+                    <span className="flex items-center gap-1.5">
+                        <Heart className="size-4" />
+                        <span>{likeCount}</span>
+                    </span>
+                )}
+                {authUserId && (
+                    <button
+                        type="button"
+                        onClick={handleBookmark}
+                        className="transition-colors hover:text-foreground"
+                    >
+                        <Bookmark
+                            className={cn(
+                                'size-4',
+                                bookmarked && 'fill-current text-primary',
+                            )}
+                        />
+                    </button>
+                )}
             </div>
-        </Link>
+        </div>
     );
 }

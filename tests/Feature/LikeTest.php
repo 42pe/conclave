@@ -112,6 +112,35 @@ test('discussion show page includes like data', function () {
     );
 });
 
+test('topic listing includes like data for discussions', function () {
+    $user = User::factory()->create();
+    $topic = Topic::factory()->public()->create();
+    $discussion = Discussion::factory()->create(['topic_id' => $topic->id]);
+    $discussion->likes()->create(['user_id' => $user->id]);
+
+    $response = $this->actingAs($user)->get(route('topics.show', $topic));
+
+    $response->assertInertia(fn ($page) => $page
+        ->component('topics/show')
+        ->where('discussions.data.0.likes_count', 1)
+        ->where('discussions.data.0.user_has_liked', true)
+    );
+});
+
+test('topic listing shows false for user_has_liked when not liked', function () {
+    $user = User::factory()->create();
+    $topic = Topic::factory()->public()->create();
+    Discussion::factory()->create(['topic_id' => $topic->id]);
+
+    $response = $this->actingAs($user)->get(route('topics.show', $topic));
+
+    $response->assertInertia(fn ($page) => $page
+        ->component('topics/show')
+        ->where('discussions.data.0.likes_count', 0)
+        ->where('discussions.data.0.user_has_liked', false)
+    );
+});
+
 test('discussion show page includes reply like data', function () {
     $this->mock(PostHogService::class)->shouldReceive('capture');
     $user = User::factory()->create();
