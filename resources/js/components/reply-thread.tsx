@@ -20,6 +20,8 @@ export type ReplyType = {
     parent_id: number | null;
     depth: number;
     body: Descendant[];
+    likes_count: number;
+    user_has_liked: boolean;
     created_at: string;
     updated_at: string;
     user: ReplyUser | null;

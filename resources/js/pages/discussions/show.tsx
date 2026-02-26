@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Lock, MapPin, MessageSquare, Pencil, Pin, Trash2 } from 'lucide-react';
+import { Heart, Lock, MapPin, MessageSquare, Pencil, Pin, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import {
     AlertDialog,
@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import { SlateRenderer } from '@/components/slate-editor/renderer';
 import { ReplyForm } from '@/components/reply-form';
 import { ReplyThread } from '@/components/reply-thread';
@@ -51,6 +52,8 @@ type Discussion = {
     is_pinned: boolean;
     is_locked: boolean;
     reply_count: number;
+    likes_count: number;
+    user_has_liked: boolean;
     created_at: string;
     updated_at: string;
     user: User | null;
@@ -88,6 +91,8 @@ function getUserInitials(user: Discussion['user']): string {
 
 export default function DiscussionShow({ topic, discussion, replies, can }: Props) {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [liked, setLiked] = useState(discussion.user_has_liked);
+    const [likeCount, setLikeCount] = useState(discussion.likes_count);
     const { auth } = usePage().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -109,6 +114,30 @@ export default function DiscussionShow({ topic, discussion, replies, can }: Prop
                 onFinish: () => setShowDeleteDialog(false),
             },
         );
+    };
+
+    const handleLike = () => {
+        setLiked(!liked);
+        setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+        fetch(`/discussions/${discussion.id}/like`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN':
+                    document.querySelector<HTMLMetaElement>(
+                        'meta[name="csrf-token"]',
+                    )?.content ?? '',
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setLiked(data.liked);
+                setLikeCount(data.likes_count);
+            })
+            .catch(() => {
+                setLiked(discussion.user_has_liked);
+                setLikeCount(discussion.likes_count);
+            });
     };
 
     return (
@@ -209,6 +238,32 @@ export default function DiscussionShow({ topic, discussion, replies, can }: Prop
 
                     <div className="rounded-lg border p-6">
                         <SlateRenderer value={discussion.body} />
+                        <div className="mt-4 flex items-center gap-4 border-t pt-3">
+                            {auth.user ? (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 gap-1.5 px-2 text-xs"
+                                    onClick={handleLike}
+                                >
+                                    <Heart
+                                        className={cn(
+                                            'size-3.5',
+                                            liked &&
+                                                'fill-current text-red-500',
+                                        )}
+                                    />
+                                    {likeCount}
+                                </Button>
+                            ) : (
+                                discussion.likes_count > 0 && (
+                                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                        <Heart className="size-3.5" />{' '}
+                                        {discussion.likes_count}
+                                    </span>
+                                )
+                            )}
+                        </div>
                     </div>
                 </div>
 

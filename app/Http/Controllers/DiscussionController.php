@@ -62,14 +62,23 @@ class DiscussionController extends Controller
             'user:id,name,username,avatar_path,preferred_name,is_deleted,bio,role',
             'location:id,name',
         ]);
+        $discussion->loadCount('likes');
+
+        $user = request()->user();
+
+        $discussion->setAttribute(
+            'user_has_liked',
+            $user ? $discussion->likes()->where('user_id', $user->id)->exists() : false,
+        );
 
         $replies = $discussion->replies()
             ->whereNull('parent_id')
+            ->withCount('likes')
             ->with([
                 'user:id,name,username,avatar_path,preferred_name,is_deleted,role',
-                'children' => fn ($q) => $q->with([
+                'children' => fn ($q) => $q->withCount('likes')->with([
                     'user:id,name,username,avatar_path,preferred_name,is_deleted,role',
-                    'children' => fn ($q) => $q->with(
+                    'children' => fn ($q) => $q->withCount('likes')->with(
                         'user:id,name,username,avatar_path,preferred_name,is_deleted,role',
                     )->orderBy('created_at'),
                 ])->orderBy('created_at'),
@@ -77,11 +86,21 @@ class DiscussionController extends Controller
             ->orderBy('created_at')
             ->get();
 
-        if ($user = request()->user()) {
+        if ($user) {
             $this->postHog->capture((string) $user->id, 'discussion_viewed', [
                 'discussion_id' => $discussion->id,
                 'topic_id' => $topic->id,
             ]);
+
+            $likedReplyIds = $user->likes()
+                ->where('likeable_type', Reply::class)
+                ->whereIn('likeable_id', $this->getAllReplyIds($replies))
+                ->pluck('likeable_id')
+                ->all();
+
+            $this->setUserHasLikedOnReplies($replies, $likedReplyIds);
+        } else {
+            $this->setUserHasLikedOnReplies($replies, []);
         }
 
         return Inertia::render('discussions/show', [
@@ -89,17 +108,53 @@ class DiscussionController extends Controller
             'discussion' => $discussion,
             'replies' => $replies,
             'can' => [
-                'update' => request()->user()
-                    ? request()->user()->can('update', $discussion)
+                'update' => $user
+                    ? $user->can('update', $discussion)
                     : false,
-                'delete' => request()->user()
-                    ? request()->user()->can('delete', $discussion)
+                'delete' => $user
+                    ? $user->can('delete', $discussion)
                     : false,
-                'reply' => request()->user()
-                    ? request()->user()->can('create', [Reply::class, $discussion])
+                'reply' => $user
+                    ? $user->can('create', [Reply::class, $discussion])
                     : false,
             ],
         ]);
+    }
+
+    /**
+     * Get all reply IDs from a nested reply collection.
+     *
+     * @param  \Illuminate\Support\Collection<int, Reply>  $replies
+     * @return list<int>
+     */
+    private function getAllReplyIds($replies): array
+    {
+        $ids = [];
+
+        foreach ($replies as $reply) {
+            $ids[] = $reply->id;
+            if ($reply->relationLoaded('children') && $reply->children->isNotEmpty()) {
+                $ids = array_merge($ids, $this->getAllReplyIds($reply->children));
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Set user_has_liked attribute on nested replies.
+     *
+     * @param  \Illuminate\Support\Collection<int, Reply>  $replies
+     * @param  list<int>  $likedReplyIds
+     */
+    private function setUserHasLikedOnReplies($replies, array $likedReplyIds): void
+    {
+        foreach ($replies as $reply) {
+            $reply->setAttribute('user_has_liked', in_array($reply->id, $likedReplyIds));
+            if ($reply->relationLoaded('children') && $reply->children->isNotEmpty()) {
+                $this->setUserHasLikedOnReplies($reply->children, $likedReplyIds);
+            }
+        }
     }
 
     /**

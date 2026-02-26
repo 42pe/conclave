@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\DiscussionController;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserSearchController;
@@ -50,6 +51,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::delete('/replies/{reply}', [ReplyController::class, 'destroy'])
         ->name('replies.destroy');
+
+    Route::post('/discussions/{discussion}/like', [LikeController::class, 'toggleDiscussionLike'])
+        ->middleware('not-suspended')
+        ->name('discussions.like');
+
+    Route::post('/replies/{reply}/like', [LikeController::class, 'toggleReplyLike'])
+        ->middleware('not-suspended')
+        ->name('replies.like');
 });
 
 Route::get('/topics/{topic:slug}/discussions/{discussion:slug}', [DiscussionController::class, 'show'])

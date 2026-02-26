@@ -9,7 +9,7 @@
 
 Hierarchy: **Topics > Discussions > Replies**
 
-13 phases, each independently deployable with its own migrations, models, controllers, pages, factories, seeders, Pest tests, and Playwright E2E tests.
+15 phases, each independently deployable with its own migrations, models, controllers, pages, factories, seeders, Pest tests, and Playwright E2E tests.
 
 ---
 
@@ -137,6 +137,8 @@ Each phase includes a dedicated **Development Seeder** that populates the databa
 | 11 | — | No new seeders (dashboard uses existing data) |
 | 12 | `UserSeeder` (update) | Set `notify_mentions` preferences on some users |
 | 13 | `NotificationSeeder` | Sample database notifications for dev users |
+| 14 | `LikeSeeder` | Scatter likes across discussions and replies from various users |
+| 15 | `BookmarkSeeder` | Bookmark some discussions for dev users |
 
 ### Seeder Design Principles
 - All seeded users use `password` as their password for easy login
@@ -801,6 +803,70 @@ body JSON NOT NULL, timestamps
 
 ---
 
+## Phase 14: Likes (Discussions & Replies)
+
+**Goal:** Users can like a discussion or a reply. Likes are toggled (like/unlike). Like count is visible to all. Polymorphic design so one table handles both.
+
+### Backend
+- Migration: `create_likes_table` — `id, user_id (FK cascadeOnDelete), likeable_id, likeable_type (morph), created_at`. Unique index on `[user_id, likeable_id, likeable_type]`.
+- `app/Models/Like.php` — `belongsTo: user`, `morphTo: likeable`. No factory needed.
+- `app/Http/Controllers/LikeController.php` — Two toggle endpoints (POST, returns JSON):
+  - `toggleDiscussionLike(Discussion $discussion)` — creates or deletes like, returns `{ liked, like_count }`
+  - `toggleReplyLike(Reply $reply)` — same pattern
+- Update `app/Models/Discussion.php` — Add `morphMany(Like::class, 'likeable')`
+- Update `app/Models/Reply.php` — Add `morphMany(Like::class, 'likeable')`
+- Update `app/Models/User.php` — Add `hasMany(Like::class)`
+- Update `app/Http/Controllers/DiscussionController.php` — In `show()`: eager-load `likes_count` on discussion and replies, pass `user_has_liked` for auth user
+- Routes in `routes/forum.php`: `POST /discussions/{discussion}/like`, `POST /replies/{reply}/like` (auth + verified + not-suspended)
+
+### Frontend
+- Update `resources/js/pages/discussions/show.tsx` — Add like button (Heart icon) in discussion body card footer. Heart filled when liked, outline when not. Count next to icon. Optimistic update on click.
+- Update `resources/js/components/reply-card.tsx` — Add like button in hover actions row (before Reply). Same Heart + count pattern. Optimistic update.
+- Update `resources/js/components/reply-thread.tsx` — Pass like props through to ReplyCard
+- Update types: `Discussion` gets `likes_count`, `user_has_liked`. `ReplyType` gets same.
+- Unauthenticated users see counts but no clickable heart.
+
+### Pest Tests
+- `tests/Feature/LikeTest.php` — Like/unlike discussion, like/unlike reply, count correctness, toggle behavior (no duplicates), auth required, suspended cannot like, show page includes like data
+
+### Development Data Seeders
+- `database/seeders/Development/LikeSeeder.php` — Scatter likes across discussions and replies from various users
+
+---
+
+## Phase 15: Bookmarks (Follow Discussions) with Notifications
+
+**Goal:** Users can bookmark/follow a discussion. When a bookmarked discussion receives a new reply, the bookmarking user gets a notification. Users can view their bookmarked discussions.
+
+### Backend
+- Migration: `create_bookmarks_table` — `id, user_id (FK cascadeOnDelete), discussion_id (FK cascadeOnDelete), created_at`. Unique index on `[user_id, discussion_id]`.
+- `app/Models/Bookmark.php` — `belongsTo: user, discussion`. No factory needed.
+- `app/Http/Controllers/BookmarkController.php`:
+  - `toggle(Discussion $discussion)` — POST, creates or deletes bookmark, returns JSON `{ bookmarked: bool }`
+  - `index()` — GET, Inertia page with user's bookmarked discussions (paginated, with topic, reply_count, last_reply_at)
+- `app/Notifications/BookmarkActivityNotification.php` — `via()`: always `['database']` (no email). `toArray()`: `{ type: 'bookmark_activity', discussion_id, discussion_title, discussion_slug, topic_id, topic_slug, replier_name, replier_username }`
+- `app/Services/BookmarkNotificationService.php` — Called from ReplyController after reply creation. Gets bookmarking users, excludes reply author and users already notified by NewReplyNotification.
+- Update `app/Models/Discussion.php` — Add `hasMany(Bookmark::class)`
+- Update `app/Models/User.php` — Add `hasMany(Bookmark::class)`
+- Update `app/Http/Controllers/DiscussionController.php` — In `show()`: pass `user_has_bookmarked` for auth user
+- Update `app/Http/Controllers/ReplyController.php` — Inject BookmarkNotificationService, call after reply creation
+- Routes: `POST /discussions/{discussion}/bookmark` (forum.php), `GET /bookmarks` (web.php) — auth + verified
+
+### Frontend
+- `resources/js/pages/bookmarks/index.tsx` — Paginated list of bookmarked discussions with topic icon, title (link), reply count, last activity. Empty state.
+- Update `resources/js/pages/discussions/show.tsx` — Add bookmark toggle button (Bookmark icon) next to like button. Filled when bookmarked. Optimistic update.
+- Update `resources/js/components/app-sidebar.tsx` — Add "Bookmarks" nav item (Bookmark icon) between Directory and Messages
+- Update `resources/js/components/notification-panel.tsx` — Add `bookmark_activity` type in icon/text/URL helpers
+
+### Pest Tests
+- `tests/Feature/BookmarkTest.php` — Bookmark/unbookmark, toggle behavior, auth required, index page, only own bookmarks, show page includes bookmark data
+- `tests/Feature/BookmarkNotificationTest.php` — Notification sent on reply to bookmarked discussion, no self-notification, no duplicate with NewReplyNotification, database-only channel, correct data
+
+### Development Data Seeders
+- `database/seeders/Development/BookmarkSeeder.php` — Bookmark some discussions for dev users
+
+---
+
 ## Verification Strategy
 
 After each phase, the following checks must pass before the **Senior Engineer** signs off:
@@ -840,3 +906,9 @@ After each phase, the following checks must pass before the **Senior Engineer** 
 | `app/Notifications/NewReplyNotification.php` | 13 (database channel) |
 | `app/Notifications/NewMessageNotification.php` | 13 (database channel) |
 | `resources/js/pages/dashboard.tsx` | 11 (dashboard redesign) |
+| `app/Http/Controllers/DiscussionController.php` | 14, 15 (like/bookmark data in show) |
+| `resources/js/pages/discussions/show.tsx` | 14, 15 (like/bookmark buttons) |
+| `resources/js/components/reply-card.tsx` | 14 (like button) |
+| `resources/js/components/reply-thread.tsx` | 14 (like props passthrough) |
+| `app/Http/Controllers/ReplyController.php` | 15 (bookmark notifications) |
+| `resources/js/components/notification-panel.tsx` | 15 (bookmark_activity type) |

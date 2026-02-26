@@ -144,6 +144,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the likes created by the user.
+     */
+    public function likes(): HasMany
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    /**
      * Get the banned email records associated with this user.
      */
     public function bannedEmails(): HasMany

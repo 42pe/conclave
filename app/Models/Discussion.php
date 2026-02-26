@@ -133,6 +133,14 @@ class Discussion extends Model
     }
 
     /**
+     * Get the likes for this discussion.
+     */
+    public function likes(): MorphMany
+    {
+        return $this->morphMany(Like::class, 'likeable');
+    }
+
+    /**
      * Scope a query to only include pinned discussions.
      */
     public function scopePinned(Builder $query): Builder

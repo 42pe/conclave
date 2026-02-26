@@ -1,5 +1,5 @@
 import { router, useForm } from '@inertiajs/react';
-import { MessageSquare, Pencil, Trash2, X } from 'lucide-react';
+import { Heart, MessageSquare, Pencil, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import type { Descendant } from 'slate';
 import {
@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SlateEditor } from '@/components/slate-editor/editor';
 import { SlateRenderer } from '@/components/slate-editor/renderer';
+import { cn } from '@/lib/utils';
 import type { ReplyType, ReplyUser } from '@/components/reply-thread';
 
 function getUserDisplayName(user: ReplyUser | null): string {
@@ -57,6 +58,8 @@ export function ReplyCard({
 }: ReplyCardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [liked, setLiked] = useState(reply.user_has_liked);
+    const [likeCount, setLikeCount] = useState(reply.likes_count);
 
     const editForm = useForm({
         body: reply.body as Descendant[],
@@ -84,6 +87,30 @@ export function ReplyCard({
         router.delete(`/replies/${reply.id}`, {
             onFinish: () => setShowDeleteDialog(false),
         });
+    };
+
+    const handleLike = () => {
+        setLiked(!liked);
+        setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+        fetch(`/replies/${reply.id}/like`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN':
+                    document.querySelector<HTMLMetaElement>(
+                        'meta[name="csrf-token"]',
+                    )?.content ?? '',
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setLiked(data.liked);
+                setLikeCount(data.likes_count);
+            })
+            .catch(() => {
+                setLiked(reply.user_has_liked);
+                setLikeCount(reply.likes_count);
+            });
     };
 
     return (
@@ -166,49 +193,84 @@ export function ReplyCard({
                     )}
 
                     {!isEditing && (
-                        <div className="mt-1 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                            {canReplyToThis && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 gap-1 px-2 text-xs"
-                                    onClick={() => onReplyClick(reply.id)}
-                                >
-                                    {activeReplyId === reply.id ? (
-                                        <>
-                                            <X className="size-3" />
-                                            Cancel
-                                        </>
-                                    ) : (
-                                        <>
-                                            <MessageSquare className="size-3" />
-                                            Reply
-                                        </>
-                                    )}
-                                </Button>
+                        <div className="mt-1 flex items-center gap-1">
+                            {likeCount > 0 && (
+                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                    <Heart
+                                        className={cn(
+                                            'size-3',
+                                            liked &&
+                                                'fill-current text-red-500',
+                                        )}
+                                    />
+                                    {likeCount}
+                                </span>
                             )}
-                            {canEdit && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 gap-1 px-2 text-xs"
-                                    onClick={() => setIsEditing(true)}
-                                >
-                                    <Pencil className="size-3" />
-                                    Edit
-                                </Button>
-                            )}
-                            {canDelete && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 gap-1 px-2 text-xs text-destructive"
-                                    onClick={() => setShowDeleteDialog(true)}
-                                >
-                                    <Trash2 className="size-3" />
-                                    Delete
-                                </Button>
-                            )}
+                            <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                                {authUserId !== null && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 gap-1 px-2 text-xs"
+                                        onClick={handleLike}
+                                    >
+                                        <Heart
+                                            className={cn(
+                                                'size-3',
+                                                liked &&
+                                                    'fill-current text-red-500',
+                                            )}
+                                        />
+                                        {liked ? 'Unlike' : 'Like'}
+                                    </Button>
+                                )}
+                                {canReplyToThis && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 gap-1 px-2 text-xs"
+                                        onClick={() =>
+                                            onReplyClick(reply.id)
+                                        }
+                                    >
+                                        {activeReplyId === reply.id ? (
+                                            <>
+                                                <X className="size-3" />
+                                                Cancel
+                                            </>
+                                        ) : (
+                                            <>
+                                                <MessageSquare className="size-3" />
+                                                Reply
+                                            </>
+                                        )}
+                                    </Button>
+                                )}
+                                {canEdit && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 gap-1 px-2 text-xs"
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        <Pencil className="size-3" />
+                                        Edit
+                                    </Button>
+                                )}
+                                {canDelete && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 gap-1 px-2 text-xs text-destructive"
+                                        onClick={() =>
+                                            setShowDeleteDialog(true)
+                                        }
+                                    >
+                                        <Trash2 className="size-3" />
+                                        Delete
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>
