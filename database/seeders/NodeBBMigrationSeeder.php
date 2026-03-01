@@ -56,6 +56,7 @@ class NodeBBMigrationSeeder extends Seeder
         $this->command->info('║         NodeBB → Conclave Migration Seeder              ║');
         $this->command->info('╚══════════════════════════════════════════════════════════╝');
 
+        $this->call(Development\LocationSeeder::class);
         $admin = $this->getOrCreateAdmin();
         $this->buildLocationMap();
         $this->importTopics($admin);
