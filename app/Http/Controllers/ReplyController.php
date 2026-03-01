@@ -37,12 +37,14 @@ class ReplyController extends Controller
             $depth = $parent->depth + 1;
         }
 
+        $body = is_string($request->body) ? json_decode($request->body, true) : $request->body;
+
         $reply = Reply::create([
             'discussion_id' => $discussion->id,
             'user_id' => $request->user()->id,
             'parent_id' => $request->parent_id,
             'depth' => $depth,
-            'body' => $request->body,
+            'body' => $body,
         ]);
 
         $this->postHog->capture((string) $request->user()->id, 'reply_created', [
@@ -55,7 +57,7 @@ class ReplyController extends Controller
         $this->bookmarkNotifications->notifyBookmarkingUsers($reply, $discussion, $request->user(), $notifiedUserIds);
 
         $this->mentions->notifyMentionedUsers(
-            $request->validated('body'),
+            $body,
             $request->user(),
             $discussion,
             $reply,

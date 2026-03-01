@@ -5,7 +5,7 @@ test.describe('Registration', () => {
     await page.goto('/register');
 
     await page.getByLabel('Username').fill('validuser');
-    await page.getByLabel('Name').fill('Test User');
+    await page.getByLabel('Name', { exact: true }).fill('Test User');
     await page.getByLabel('Email address').fill('newuser@example.com');
     await page.getByLabel('Password', { exact: true }).fill('password');
     await page.getByLabel('Confirm password').fill('password');
@@ -19,7 +19,7 @@ test.describe('Registration', () => {
     await page.goto('/register');
 
     await page.getByLabel('Username').fill('abc');
-    await page.getByLabel('Name').fill('Test User');
+    await page.getByLabel('Name', { exact: true }).fill('Test User');
     await page.getByLabel('Email address').fill('short@example.com');
     await page.getByLabel('Password', { exact: true }).fill('password');
     await page.getByLabel('Confirm password').fill('password');
@@ -32,7 +32,7 @@ test.describe('Registration', () => {
     await page.goto('/register');
 
     await page.getByLabel('Username').fill('Bad.User!');
-    await page.getByLabel('Name').fill('Test User');
+    await page.getByLabel('Name', { exact: true }).fill('Test User');
     await page.getByLabel('Email address').fill('invalid@example.com');
     await page.getByLabel('Password', { exact: true }).fill('password');
     await page.getByLabel('Confirm password').fill('password');

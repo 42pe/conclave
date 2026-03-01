@@ -392,6 +392,8 @@ body JSON NOT NULL, timestamps
 | 2.4 | `privacy.spec.ts` | Privacy settings page loads | Navigate to `/settings/privacy`, verify toggles present |
 | 2.5 | `privacy.spec.ts` | Privacy settings persist | Toggle settings off, save, reload — settings remain off |
 | 2.6 | `privacy.spec.ts` | Notification preferences load | Verify notify_replies, notify_messages toggles exist |
+| 2.7 | `avatar.spec.ts` | Avatar displays on public profile | Upload avatar, visit `/users/{username}` — avatar visible on profile page |
+| 2.8 | `avatar.spec.ts` | Avatar upload rejects invalid file | Upload oversized/wrong-type file — validation error shown |
 
 ---
 
@@ -446,6 +448,8 @@ body JSON NOT NULL, timestamps
 | 3.6 | `admin/topics.spec.ts` | Admin can edit a topic | Login as admin, edit existing topic title, verify change |
 | 3.7 | `admin/topics.spec.ts` | Non-admin cannot access admin pages | Login as testuser, navigate to `/admin/topics` — redirected |
 | 3.8 | `topics.spec.ts` | Topic card shows discussion count | Homepage topics show discussion count badges |
+| 3.9 | `admin/topics.spec.ts` | Admin can delete a topic | Login as admin, delete topic via AlertDialog confirmation, verify removed |
+| 3.10 | `topics.spec.ts` | Private topic requires login | Guest visiting private topic URL — redirected to login |
 
 ---
 
@@ -491,6 +495,9 @@ body JSON NOT NULL, timestamps
 | 4.3 | `slate-editor.spec.ts` | Toolbar bold button works | Select text, click bold, verify bold formatting applied |
 | 4.4 | `slate-editor.spec.ts` | Toolbar heading button works | Click heading button, type text, verify heading rendered |
 | 4.5 | `slate-editor.spec.ts` | Can upload image in editor | Upload image via toolbar, verify image preview in editor |
+| 4.6 | `slate-editor.spec.ts` | Toolbar list button works | Click bulleted list, type items, verify list renders |
+| 4.7 | `slate-editor.spec.ts` | Toolbar blockquote button works | Click blockquote, type text, verify blockquote renders |
+| 4.8 | `slate-editor.spec.ts` | Toolbar link insertion works | Insert link via toolbar, verify link element in editor |
 
 ---
 
@@ -545,6 +552,9 @@ body JSON NOT NULL, timestamps
 | 5.9 | `discussions.spec.ts` | Guest can view discussions | Without login, navigate to topic and view a discussion |
 | 5.10 | `discussions.spec.ts` | Guest cannot create discussion | Without login, no create discussion button visible |
 | 5.11 | `discussions.spec.ts` | Discussion card shows metadata | Cards show author name, time ago, reply count |
+| 5.12 | `discussions.spec.ts` | Location filter works | Select location from filter dropdown — discussion list filters to matching location |
+| 5.13 | `discussions.spec.ts` | Admin can edit/delete any discussion | Login as admin, edit/delete another user's discussion — succeeds |
+| 5.14 | `discussions.spec.ts` | Guest redirected from private topic | Visit `/topics/{private-slug}` without login — redirected to login |
 
 ---
 
@@ -591,6 +601,8 @@ body JSON NOT NULL, timestamps
 | 6.5 | `replies.spec.ts` | Can delete own reply | Delete reply — reply removed |
 | 6.6 | `replies.spec.ts` | Guest cannot reply | Without login, reply form/button not available |
 | 6.7 | `replies.spec.ts` | Locked discussion hides reply form | Admin locks discussion — reply form hidden for regular users |
+| 6.8 | `replies.spec.ts` | Max depth reply button hidden | Reply button is hidden/absent on depth-2 replies (no 4th level) |
+| 6.9 | `replies.spec.ts` | Admin can edit/delete any reply | Login as admin, edit/delete another user's reply — succeeds |
 
 ---
 
@@ -634,6 +646,8 @@ body JSON NOT NULL, timestamps
 | 7.6 | `users/directory.spec.ts` | Directory search filters users | Type in search box — list filters to matching users |
 | 7.7 | `users/directory.spec.ts` | Directory excludes deleted users | Deleted users not visible in directory |
 | 7.8 | `users/directory.spec.ts` | Privacy: hidden user not in directory | User with `show_in_directory=false` not shown |
+| 7.9 | `users/profile.spec.ts` | Send Message button on profile | Click "Message" button on profile — navigates to conversation with that user |
+| 7.10 | `users/profile.spec.ts` | Admin/moderator badge on profile | Admin user profile shows role badge |
 
 ---
 
@@ -684,6 +698,10 @@ body JSON NOT NULL, timestamps
 | 8.6 | `admin/users.spec.ts` | Admin can ban a user | Ban user, verify badge shows "Banned" |
 | 8.7 | `admin/users.spec.ts` | Banned email cannot register | Try to register with banned email — error shown |
 | 8.8 | `admin/users.spec.ts` | Admin can delete a user (anonymize) | Delete user, verify content shows "Deleted User" |
+| 8.9 | `admin/users.spec.ts` | Admin cannot ban/suspend another admin | Attempt to suspend admin user — action blocked (403 or no button) |
+| 8.10 | `admin/users.spec.ts` | Admin can create a user | Fill admin create user form, submit — new user appears in table |
+| 8.11 | `admin/users.spec.ts` | Suspended user cannot like | Login as suspended, navigate to discussion — like button disabled/hidden |
+| 8.12 | `admin/users.spec.ts` | Suspended user cannot send messages | Login as suspended, navigate to messages — new conversation blocked |
 
 ---
 
@@ -732,6 +750,9 @@ body JSON NOT NULL, timestamps
 | 9.4 | `conversations.spec.ts` | Unread badge shows in sidebar | Second user sends message → first user sees unread badge on Messages nav |
 | 9.5 | `conversations.spec.ts` | Conversation list shows latest message preview | Conversation list shows snippet of most recent message |
 | 9.6 | `conversations.spec.ts` | Guest cannot access messages | Without login, `/messages` redirects to login |
+| 9.7 | `conversations.spec.ts` | Messages page empty state | Fresh user with no conversations sees "No conversations yet" message |
+| 9.8 | `conversations.spec.ts` | Cannot view another user's conversation | Navigate to conversation URL user is not a participant of — forbidden/redirected |
+| 9.9 | `conversations.spec.ts` | Rich text renders in message thread | Send formatted message — verify bold/list renders in thread |
 
 ---
 
@@ -827,6 +848,7 @@ body JSON NOT NULL, timestamps
 | 11.4 | `dashboard.spec.ts` | Dashboard loads with stats | Login, visit `/dashboard` — user stats cards visible |
 | 11.5 | `dashboard.spec.ts` | Dashboard shows recent discussions | Dashboard has recent discussions section with discussion links |
 | 11.6 | `dashboard.spec.ts` | Dashboard skeleton states appear | Deferred sections show skeleton loading before data loads |
+| 11.7 | `dashboard.spec.ts` | Dashboard quick action links work | Click "Browse Topics" and "New Message" quick actions — navigate correctly |
 
 ---
 
@@ -881,6 +903,8 @@ body JSON NOT NULL, timestamps
 | 12.2 | `slate-editor.spec.ts` | Selecting mention inserts chip | Click user in autocomplete — mention chip inserted in editor |
 | 12.3 | `slate-editor.spec.ts` | Mention renders as link in content | Submit discussion with mention — renders as clickable user link |
 | 12.4 | `slate-editor.spec.ts` | Mention link navigates to profile | Click mention link in discussion body — navigates to user profile |
+| 12.5 | `slate-editor.spec.ts` | @mention works in reply form | Open reply form, type `@` — autocomplete appears in reply editor too |
+| 12.6 | `slate-editor.spec.ts` | @mention not available in messages | Open message composer, type `@` — NO autocomplete (intentional) |
 
 ---
 
@@ -927,6 +951,8 @@ body JSON NOT NULL, timestamps
 | 13.6 | `notifications.spec.ts` | Mark all notifications as read | Click "Mark all as read" — all cleared, badge updates |
 | 13.7 | `notifications.spec.ts` | Notification click navigates to content | Click reply notification — navigates to the discussion |
 | 13.8 | `notifications.spec.ts` | Unread count badge updates | After marking all read, badge disappears from sidebar |
+| 13.9 | `notifications.spec.ts` | Message notification appears | User A sends message to User B — User B sees message notification in panel |
+| 13.10 | `notifications.spec.ts` | Notification panel empty state | Mark all read / fresh user — panel shows "No notifications yet" |
 
 ### Development Data Seeders
 - `database/seeders/Development/NotificationSeeder.php` — seed sample notifications for dev users
@@ -1021,6 +1047,7 @@ body JSON NOT NULL, timestamps
 | 15.7 | `bookmarks.spec.ts` | Bookmark toggle on topic listing card | Click bookmark on discussion card — toggles without navigating |
 | 15.8 | `bookmarks.spec.ts` | Bookmark notification on new reply | User A bookmarks, User B replies — User A sees notification |
 | 15.9 | `bookmarks.spec.ts` | Bookmarks sidebar nav item works | Click "Bookmarks" in sidebar — navigates to bookmarks page |
+| 15.10 | `bookmarks.spec.ts` | Guest cannot access bookmarks page | Without login, `/bookmarks` redirects to login |
 
 ### Development Data Seeders
 - `database/seeders/Development/BookmarkSeeder.php` — Bookmark some discussions for dev users
@@ -1072,6 +1099,42 @@ body JSON NOT NULL, timestamps
 | 16.1 | `views.spec.ts` | View count displays on discussion card | Topic listing cards show eye icon + view count |
 | 16.2 | `views.spec.ts` | View count displays on discussion detail | Discussion detail page shows view count |
 | 16.3 | `views.spec.ts` | View count increments on visit | Note count, visit discussion, go back — count incremented by 1 |
+
+---
+
+## Cross-Phase E2E Tests
+
+These tests exercise multi-phase user journeys that span features from different phases. They live in a dedicated spec file.
+
+**File**: `e2e-tests/tests/cross-phase/journeys.spec.ts`
+
+| # | Test | Description | Phases |
+|---|------|-------------|--------|
+| X.1 | Full notification-to-content flow | Create discussion → another user replies → author sees notification → clicks notification → navigates to discussion with reply visible | 5, 6, 13 |
+| X.2 | Bookmark + notification + navigation | User A bookmarks discussion → User B replies → User A opens notification panel → sees bookmark_activity → clicks → navigates to discussion | 6, 13, 15 |
+| X.3 | Suspended user full restriction chain | Login as suspended → try create discussion (blocked) → try reply (blocked) → try like (blocked) → can still browse and view content | 5, 6, 8, 14 |
+| X.4 | Guest vs authenticated homepage | As guest: see public topics only, no like/bookmark buttons. Login: see private topics, like/bookmark buttons appear on cards | 3, 14, 15 |
+| X.5 | User moderation content impact | Admin bans user → navigate to discussion authored by banned user → displays "Deleted User" on discussion and replies | 1, 5, 6, 8 |
+| X.6 | Privacy settings chain | User sets show_in_directory=false → directory excludes them → profile page hides email → @mention autocomplete still finds them (username-based) | 2, 7, 12 |
+
+---
+
+## E2E Fixture Requirements
+
+The existing auth/database fixtures need extensions to support the full test suite:
+
+### Auth Fixtures (`e2e-tests/tests/fixtures/auth.ts`)
+Extend with additional authenticated page fixtures:
+- **`adminPage`** — logs in as `admin@example.com` (needed for Phases 3, 8, 11)
+- **`moderatorPage`** — logs in as `moderator@example.com` (needed for Phase 6, 8)
+- **`suspendedPage`** — logs in as `suspended@example.com` (needed for Phase 8, cross-phase X.3)
+- **`secondUserPage`** — logs in as `minimal@example.com` (needed for two-user interaction tests: messaging, notifications)
+
+### Database Fixtures (`e2e-tests/tests/fixtures/database.ts`)
+- Add `artisanCommand(cmd: string)` helper for arbitrary artisan commands (clearing notifications, etc.)
+
+### Seeder Requirements
+- Add a dedicated "expendable" user to `UserSeeder` for ban/delete tests (so moderation E2E tests don't affect other seeded users)
 
 ---
 

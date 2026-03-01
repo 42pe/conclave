@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\TopicVisibility;
 use App\Models\Discussion;
 use App\Models\Location;
 use App\Models\Topic;
@@ -338,20 +337,20 @@ test('non-owner regular user gets 403 when deleting discussion', function () {
 
 // --- Authorization: topic visibility enforcement ---
 
-test('unauthenticated user is forbidden from viewing private topic discussions', function () {
+test('unauthenticated user is redirected to login from private topic discussions', function () {
     $topic = Topic::factory()->private()->create();
 
     $response = $this->get(route('topics.show', $topic));
 
-    $response->assertForbidden();
+    $response->assertRedirect(route('login'));
 });
 
-test('unauthenticated user is forbidden from viewing restricted topic discussions', function () {
+test('unauthenticated user is redirected to login from restricted topic discussions', function () {
     $topic = Topic::factory()->restricted()->create();
 
     $response = $this->get(route('topics.show', $topic));
 
-    $response->assertForbidden();
+    $response->assertRedirect(route('login'));
 });
 
 test('regular user is forbidden from viewing restricted topic discussions', function () {

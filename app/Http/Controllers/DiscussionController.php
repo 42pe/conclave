@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TopicVisibility;
 use App\Http\Requests\StoreDiscussionRequest;
 use App\Http\Requests\UpdateDiscussionRequest;
 use App\Models\Bookmark;
@@ -28,8 +29,12 @@ class DiscussionController extends Controller
     /**
      * Display a listing of discussions for a topic.
      */
-    public function index(Topic $topic): Response
+    public function index(Topic $topic): Response|RedirectResponse
     {
+        if (! request()->user() && $topic->visibility !== TopicVisibility::Public) {
+            return redirect()->guest(route('login'));
+        }
+
         $this->authorize('viewAny', [Discussion::class, $topic]);
 
         $discussions = $topic->discussions()
@@ -85,8 +90,12 @@ class DiscussionController extends Controller
     /**
      * Display the specified discussion.
      */
-    public function show(Topic $topic, Discussion $discussion): Response
+    public function show(Topic $topic, Discussion $discussion): Response|RedirectResponse
     {
+        if (! request()->user() && $topic->visibility !== TopicVisibility::Public) {
+            return redirect()->guest(route('login'));
+        }
+
         $this->authorize('view', $discussion);
 
         $discussion->increment('view_count');
@@ -215,8 +224,12 @@ class DiscussionController extends Controller
     {
         $this->authorize('create', [Discussion::class, $topic]);
 
+        $validated = $request->validated();
+        $body = is_string($validated['body']) ? json_decode($validated['body'], true) : $validated['body'];
+        $validated['body'] = $body;
+
         $discussion = Discussion::create([
-            ...$request->validated(),
+            ...$validated,
             'topic_id' => $topic->id,
             'user_id' => $request->user()->id,
         ]);
@@ -227,7 +240,7 @@ class DiscussionController extends Controller
         ]);
 
         $this->mentions->notifyMentionedUsers(
-            $request->validated('body'),
+            $body,
             $request->user(),
             $discussion,
         );
@@ -256,10 +269,14 @@ class DiscussionController extends Controller
     {
         $this->authorize('update', $discussion);
 
-        $discussion->update($request->validated());
+        $validated = $request->validated();
+        $body = is_string($validated['body']) ? json_decode($validated['body'], true) : $validated['body'];
+        $validated['body'] = $body;
+
+        $discussion->update($validated);
 
         $this->mentions->notifyMentionedUsers(
-            $request->validated('body'),
+            $body,
             $request->user(),
             $discussion,
         );

@@ -12,3 +12,10 @@ export function seedDatabase(): void {
 export function resetDatabase(): void {
   execSync('ddev php artisan migrate:fresh --seed --no-interaction', EXEC_OPTIONS);
 }
+
+export function artisanCommand(cmd: string): string {
+  return execSync(`ddev php artisan ${cmd} --no-interaction`, {
+    ...EXEC_OPTIONS,
+    encoding: 'utf-8',
+  });
+}

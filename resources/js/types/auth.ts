@@ -27,6 +27,10 @@ export type Auth = {
     user: User;
 };
 
+export type GuestAuth = {
+    user: User | null;
+};
+
 export type TwoFactorSetupData = {
     svg: string;
     url: string;

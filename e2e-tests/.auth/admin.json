@@ -1,0 +1,45 @@
+{
+  "cookies": [
+    {
+      "name": "appearance",
+      "value": "system",
+      "domain": "conclave.ddev.site",
+      "path": "/",
+      "expires": 1803865162.862242,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "XSRF-TOKEN",
+      "value": "eyJpdiI6ImZHRVlkZzk4Q0l4Nk1QTFFJTWxSTFE9PSIsInZhbHVlIjoiaktIMnZZa214citPZ2QwNWRhTFE2cHJnenVPejB4dHllR0pUdzJQSTBucGRMYzVQVVd3eGVCME4wUVovamlndDhFSzE3UVZJNllGS294MGZ5aGJSNHhpT1UyWEh2OXJvalNGZC8rdGtIL2F2QndiWWRFWnRYazY5aERNOHhUUksiLCJtYWMiOiJiNWY4Yzc1ZjY5MjdhYWU3YTM1ZWE0ZTQ0NTE0MGJhMDBkYjk4NDVjNzJjZjY0ZTU0MjE1NDY2YzhiODM5NmY1IiwidGFnIjoiIn0%3D",
+      "domain": "conclave.ddev.site",
+      "path": "/",
+      "expires": 1772336363.520324,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "laravel-session",
+      "value": "eyJpdiI6InllSlUybTR4N0JsanpUQ0kxdmpjY1E9PSIsInZhbHVlIjoiY1cvVEZNSnl2bGtGUDAzRWQ4cDl5cjlmZnExTGIrSFlyeHcxcEFEOWVSdVBwUWxxaU9ObVFreE91ZzBMVFA4Vkx1ZVRMcnlwdG56bGtXcmNXdXFHSDlKNCtiaDAxd0RrdmJSSVljQnk1VWJ3TmttcDR0aitMWWZ6bk5rZXRQd2oiLCJtYWMiOiI5MWIyYWUxMTAzMDNmZDVhN2MxMDY4ODY3NWViZTM3OWE1NmFhNzBjNzdiNjQxZjg0NGJjZTRjOTNjM2NmZGU5IiwidGFnIjoiIn0%3D",
+      "domain": "conclave.ddev.site",
+      "path": "/",
+      "expires": 1772336363.52038,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://conclave.ddev.site",
+      "localStorage": [
+        {
+          "name": "appearance",
+          "value": "system"
+        }
+      ]
+    }
+  ]
+}

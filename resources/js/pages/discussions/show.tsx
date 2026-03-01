@@ -21,7 +21,7 @@ import { ReplyForm } from '@/components/reply-form';
 import { ReplyThread } from '@/components/reply-thread';
 import type { ReplyType } from '@/components/reply-thread';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, GuestAuth } from '@/types';
 import type { Descendant } from 'slate';
 
 type Topic = {
@@ -96,7 +96,7 @@ export default function DiscussionShow({ topic, discussion, replies, can }: Prop
     const [liked, setLiked] = useState(discussion.user_has_liked);
     const [likeCount, setLikeCount] = useState(discussion.likes_count);
     const [bookmarked, setBookmarked] = useState(discussion.user_has_bookmarked);
-    const { auth } = usePage().props;
+    const { auth } = usePage<{ auth: GuestAuth }>().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Forum', href: '/' },

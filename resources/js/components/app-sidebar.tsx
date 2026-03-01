@@ -18,14 +18,27 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useCurrentUrl } from '@/hooks/use-current-url';
-import type { Auth, NavItem } from '@/types';
+import type { GuestAuth, NavItem } from '@/types';
 import AppLogo from './app-logo';
 import { dashboard } from '@/routes';
 import { index as adminTopicsIndex } from '@/routes/admin/topics';
 import { index as adminUsersIndex } from '@/routes/admin/users';
 import { index as directoryIndex } from '@/routes/directory';
 
-const mainNavItems: NavItem[] = [
+const guestNavItems: NavItem[] = [
+    {
+        title: 'Forum',
+        href: '/',
+        icon: MessageCircle,
+    },
+    {
+        title: 'Directory',
+        href: directoryIndex().url,
+        icon: Users,
+    },
+];
+
+const authNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
@@ -76,12 +89,13 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { auth, unread_messages_count, unread_notifications_count } = usePage<{
-        auth: Auth;
+        auth: GuestAuth;
         unread_messages_count: number;
         unread_notifications_count: number;
     }>().props;
     const { isCurrentUrl } = useCurrentUrl();
-    const isAdmin = auth.user.role === 'admin';
+    const user = auth.user;
+    const isAdmin = user?.role === 'admin';
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -98,28 +112,30 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={user ? authNavItems : guestNavItems} />
 
-                <SidebarGroup className="px-2 py-0">
-                    <SidebarMenu>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton
-                                asChild
-                                isActive={isCurrentUrl('/messages')}
-                                tooltip={{ children: 'Messages' }}
-                            >
-                                <Link href="/messages" prefetch>
-                                    <Mail />
-                                    <span>Messages</span>
-                                </Link>
-                            </SidebarMenuButton>
-                            {unread_messages_count > 0 && (
-                                <SidebarMenuBadge>{unread_messages_count}</SidebarMenuBadge>
-                            )}
-                        </SidebarMenuItem>
-                        <NotificationPanel unreadCount={unread_notifications_count} />
-                    </SidebarMenu>
-                </SidebarGroup>
+                {user && (
+                    <SidebarGroup className="px-2 py-0">
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isCurrentUrl('/messages')}
+                                    tooltip={{ children: 'Messages' }}
+                                >
+                                    <Link href="/messages" prefetch>
+                                        <Mail />
+                                        <span>Messages</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                                {unread_messages_count > 0 && (
+                                    <SidebarMenuBadge>{unread_messages_count}</SidebarMenuBadge>
+                                )}
+                            </SidebarMenuItem>
+                            <NotificationPanel unreadCount={unread_notifications_count} />
+                        </SidebarMenu>
+                    </SidebarGroup>
+                )}
 
                 {isAdmin && (
                     <SidebarGroup className="px-2 py-0">
@@ -149,7 +165,7 @@ export function AppSidebar() {
 
             <SidebarFooter>
                 <NavFooter items={footerNavItems} className="mt-auto" />
-                <NavUser />
+                {user && <NavUser />}
             </SidebarFooter>
         </Sidebar>
     );
