@@ -1,0 +1,23 @@
+{
+  "name": "nodebb-scraper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "scrape": "tsx src/index.ts",
+    "scrape:tags": "tsx src/index.ts --only=tags",
+    "scrape:users": "tsx src/index.ts --only=users",
+    "scrape:discussions": "tsx src/index.ts --only=discussions",
+    "scrape:images": "tsx src/index.ts --only=images"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "tough-cookie": "^5.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/tough-cookie": "^4.0.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -46,7 +46,7 @@ test('registration fails with username containing dots', function () {
     $this->assertGuest();
 });
 
-test('registration fails with uppercase username', function () {
+test('registration succeeds with uppercase username', function () {
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',
         'username' => 'TestUser',
@@ -55,8 +55,8 @@ test('registration fails with uppercase username', function () {
         'password_confirmation' => 'password',
     ]);
 
-    $response->assertSessionHasErrors('username');
-    $this->assertGuest();
+    $this->assertAuthenticated();
+    $this->assertDatabaseHas('users', ['username' => 'TestUser']);
 });
 
 test('registration fails with username too short', function () {
